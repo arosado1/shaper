@@ -1,5 +1,6 @@
 # njet normalization after applygin shape 
 
+import sys
 import os
 import numpy as np
 import ROOT
@@ -11,8 +12,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 # Open root file
 #--------------------------------------------------------------------------------------------------------------
 
-year  = input("Enter year: ")
-year = str(year)
+year = sys.argv[1]
 
 root_file = ROOT.TFile.Open("/uscms/home/arosado/nobackup/YOURWORKINGAREA/CMSSW_10_2_9/src/ZInvisible/Tools/condor/eighth_run/" + year + "/result.root", 'read')
 in_root = 'nJets_drLeptonCleaned_jetpt20'
@@ -37,7 +37,7 @@ for particle in particles:
             # Histograms names
 
             err = "{}".format("" if not metcut else "_")
-            prefix = 'DataMC_' + particle + '_' + region + '_njetWeight_' + metcut + err + 'nj_jetpt20_' + year + 'nJets_drLeptonCleaned_jetpt20nJets_drLeptonCleaned_jetpt20'
+            prefix = 'DataMC_' + particle + '_' + region + '_njetWeight_' + metcur + err + 'nj_jetpt20_' + year + 'nJets_drLeptonCleaned_jetpt20nJets_drLeptonCleaned_jetpt20'
             Data  = prefix + 'Datadata'
             DY    = prefix + 'DYstack'
             Sint  = prefix + 'Single tstack'
@@ -111,6 +111,6 @@ particles.append("Combine")
 for particle in particles:
     for region in regions:
         print("\n" + particle + " " + region + ": " + str(norms[region][particle]))
-        with open('normalizations.txt', 'a+') as sheet:
-            sheet.write("\hline" + region + " & " + particle + " & " + year + " & " + str(norms[region][particle]) + " \n") 
+ #       with open('normalizations.txt', 'a+') as sheet:
+ #           sheet.write("\hline" + region + " & " + particle + " & " + year + " & " + str(norms[region][particle]) + " \n") 
 

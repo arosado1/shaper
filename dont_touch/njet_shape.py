@@ -1,5 +1,6 @@
 # njets all
 
+import sys
 import os
 import numpy as np
 import ROOT
@@ -12,12 +13,11 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 # Get root file explicitly
 
-year  = input("Enter year: ")
-year = str(year)
+year  = sys.argv[1]
 
 root_file = ROOT.TFile.Open("/uscms/home/arosado/nobackup/YOURWORKINGAREA/CMSSW_10_2_9/src/ZInvisible/Tools/condor/eighth_run/" + year + "/result.root", 'read')
 in_root = 'nJets_drLeptonCleaned_jetpt20'
-f = ROOT.TFile("shapes_njets.root", 'recreate')
+f = ROOT.TFile("shapes_njets_" + year + ".root", 'recreate')
 
 # Get histograms
 
@@ -173,12 +173,12 @@ for particle in particles:
 
 # Save new Histogram as png and root
 
-	    if not metcut:
-                file_name = prefix + 'nj_' + year + 'metWithLL_Shape.png'
-            else:
-                file_name = prefix + '_nj_' + year + 'metWithLL_Shape.png'
+	#    if not metcut:
+        #        file_name = prefix + 'nj_' + year + 'metWithLL_Shape.png'
+        #    else:
+        #        file_name = prefix + '_nj_' + year + 'metWithLL_Shape.png'
 
-	    canvas.SaveAs(file_name)
+	#    canvas.SaveAs(file_name)
 
             h_Shape.Write()
 

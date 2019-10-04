@@ -83,7 +83,7 @@ if not h_lowdm_upper["pred"]:
 
 for plot in plots:
 
-    histo["angel"]["LowDM"][plot] =  ROOT.TH1F( "LowDM_" + plot , "LowDM_" + plot , 19, 0, 19)
+    histo["angel"]["LowDM"][plot] =  ROOT.TH1F( "nValidationBinLowDM_jetpt20",  "nValidationBinLowDM_jetpt20", 19, 0, 19)
 
     for k in range(1,20):
 
@@ -155,7 +155,7 @@ for region in regions:
             
         # save histograms
         c.Update()
-        file_name = "validation_" + region + "_" + year + "_" + plot + "_comparison" 
+        file_name = "validation_" + region + "_" + year + "_" + plot + "_angel_caleb_comparison" 
         c.SaveAs(file_name + ".png")
     
 caleb_file.Close()

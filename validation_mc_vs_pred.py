@@ -54,7 +54,7 @@ h_lowdm_upper["pred"]  = root_file.Get( lowdm_upper_file + "/" + "ZNuNu_nValidat
 
 for plot in plots:
 
-    histo["LowDM"][plot] =  ROOT.TH1F( "LowDM_" + plot , "LowDM_" + plot , 19, 0, 19)
+    histo["LowDM"][plot] =  ROOT.TH1F( "nValidationBinLowDM_jetpt20", "nValidationBinLowDM_jetpt20", 19, 0, 19)
 
     for k in range(1,20):
     
@@ -113,6 +113,6 @@ for region in regions:
         
     # save histograms
     c.Update()
-    c.SaveAs("validation_" + region +  "_" + year + "_mc_pred_comparison.png")
+    c.SaveAs("validation_" + region +  "_" + year + "_mc_pred_ratio.png")
 
 root_file.Close()

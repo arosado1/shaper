@@ -23,7 +23,8 @@ root_file = ROOT.TFile.Open(file_location, 'update')
 
 particles     =  ["Electron", 'Muon']
 regions       =  ['HighDM', 'LowDM']
-metcuts       =  ['', 'Mid', 'Loose']
+# metcuts       =  ['', 'Mid', 'Loose']
+metcuts       = ['Loose']  # for pred
 
 nbins  =  10
 start  =  0
@@ -41,10 +42,14 @@ for region in regions:
         # crate and load histograms
         #-----------------------------
 
-        h_electron  =  root_file.Get("njets_shape_" + year + "_Electron_" + region + err + metcut)
-        h_muon      =  root_file.Get("njets_shape_" + year + "_Muon_"     + region + err + metcut)
+        # h_electron  =  root_file.Get("njets_shape_" + year + "_Electron_" + region + err + metcut)
+        # h_muon      =  root_file.Get("njets_shape_" + year + "_Muon_"     + region + err + metcut)
+        h_electron  =  root_file.Get("njets_pred_" + year + "_Electron_" + region + err + metcut)    # for pred
+        h_muon      =  root_file.Get("njets_pred_" + year + "_Muon_"     + region + err + metcut)    # for pred
 
-        name        =  "njets_shape_" + year + "_Combine_"  + region + err + metcut
+        # name        =  "njets_shape_" + year + "_Combine_"  + region + err + metcut
+        name        =  "njets_pred_" + year + "_Combine_"  + region + err + metcut    # for pred
+
         h_combine   =  ROOT.TH1F( name, name, nbins, start, end)
 
         #-----------------------------

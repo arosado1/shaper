@@ -37,7 +37,7 @@ for particle in particles:
             # Histograms names
 
             err = "{}".format("" if not metcut else "_")
-            prefix = 'DataMC_' + particle + '_' + region + '_njetWeight_' + metcur + err + 'nj_jetpt20_' + year + 'nJets_drLeptonCleaned_jetpt20nJets_drLeptonCleaned_jetpt20'
+            prefix = 'DataMC_' + particle + '_' + region + '_njetWeight_' + metcut + err + 'nj_jetpt20_' + year + 'nJets_drLeptonCleaned_jetpt20nJets_drLeptonCleaned_jetpt20'
             Data  = prefix + 'Datadata'
             DY    = prefix + 'DYstack'
             Sint  = prefix + 'Single tstack'

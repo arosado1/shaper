@@ -13,17 +13,18 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 # Get root file explicitly
 
-year  = sys.argv[1]
+location = sys.argv[1]
+year  = sys.argv[2]
 
-root_file = ROOT.TFile.Open("/uscms/home/arosado/nobackup/YOURWORKINGAREA/CMSSW_10_2_9/src/ZInvisible/Tools/condor/eighth_run/" + year + "/result.root", 'read')
-in_root = 'nJets_drLeptonCleaned_jetpt20'
+root_file = ROOT.TFile.Open(location)
+in_root = 'nJets_drLeptonCleaned_jetpt30'
 f = ROOT.TFile("shapes_njets_" + year + ".root", 'recreate')
 
 # Get histograms
 
 particles  =  ['Electron', 'Muon', 'Combine']
 regions    =  ['HighDM', 'LowDM']
-metcuts    =  ["", 'Mid', 'Loose']
+metcuts    =  ['Loose']
 
 norms  =  {}
 histos =  {}
@@ -55,11 +56,11 @@ for particle in particles:
             err = "{}".format("" if not metcut else "_")
 
             histos[particle][region][metcut] = {
-		'Data'  :  prefix + err + 'nj_jetpt20_' + year + 'nJets_drLeptonCleaned_jetpt20nJets_drLeptonCleaned_jetpt20' + 'Datadata',
-		'DY'    :  prefix + err + 'nj_jetpt20_' + year + 'nJets_drLeptonCleaned_jetpt20nJets_drLeptonCleaned_jetpt20' + 'DYstack',
-		'Sint'  :  prefix + err + 'nj_jetpt20_' + year + 'nJets_drLeptonCleaned_jetpt20nJets_drLeptonCleaned_jetpt20' + 'Single tstack',
-		'TTbar' :  prefix + err + 'nj_jetpt20_' + year + 'nJets_drLeptonCleaned_jetpt20nJets_drLeptonCleaned_jetpt20' + 't#bar{t}stack',
-		'Rare'  :  prefix + err + 'nj_jetpt20_' + year + 'nJets_drLeptonCleaned_jetpt20nJets_drLeptonCleaned_jetpt20' + 'Rarestack'
+		'Data'  :  prefix + err + 'nj_jetpt30_' + year + 'nJets_drLeptonCleaned_jetpt30nJets_drLeptonCleaned_jetpt30' + 'Datadata',
+		'DY'    :  prefix + err + 'nj_jetpt30_' + year + 'nJets_drLeptonCleaned_jetpt30nJets_drLeptonCleaned_jetpt30' + 'DYstack',
+		'Sint'  :  prefix + err + 'nj_jetpt30_' + year + 'nJets_drLeptonCleaned_jetpt30nJets_drLeptonCleaned_jetpt30' + 'Single tstack',
+		'TTbar' :  prefix + err + 'nj_jetpt30_' + year + 'nJets_drLeptonCleaned_jetpt30nJets_drLeptonCleaned_jetpt30' + 't#bar{t}stack',
+		'Rare'  :  prefix + err + 'nj_jetpt30_' + year + 'nJets_drLeptonCleaned_jetpt30nJets_drLeptonCleaned_jetpt30' + 'Rarestack'
 		}
 
 	    print('We are now in: ' + particle + ' ' + region + ' ' + metcut) #debbuging
@@ -205,12 +206,12 @@ for region in regions:
 
 # Save Normalization and shape factors
 
-for region in regions:
-    for particle in particles:
-        for metcut in metcuts:
-            if metcut == 'MidHT' and region == 'LowDM':
-                continue
-            with open('normalizations.txt', 'a+') as sheet:
-                sheet.write(year + " " + region + " " + particle + " " + metcut + " : " + str(norms[particle][region][metcut]['R_Z']) + "\n")
+ #for region in regions:
+ #    for particle in particles:
+ #        for metcut in metcuts:
+ #            if metcut == 'MidHT' and region == 'LowDM':
+ #                continue
+ #            with open('normalizations.txt', 'a+') as sheet:
+ #                sheet.write(year + " " + region + " " + particle + " " + metcut + " : " + str(norms[particle][region][metcut]['R_Z']) + "\n")
 
 f.Close()

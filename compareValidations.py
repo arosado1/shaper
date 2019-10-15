@@ -3,6 +3,7 @@
 import sys 
 import os
 import ROOT
+import math as m
 # from ROOT import kBlue, kRed
 
 ROOT.PyConfig.IgnoreCommandLineOptions = True
@@ -56,27 +57,6 @@ h_lowdm_upper["mc"]    =  angel_file.Get( lowdm_upper_file + "/" + "ZNuNu_nValid
 h_lowdm_upper["pred"]  =  angel_file.Get( lowdm_upper_file + "/" + "ZNuNu_nValidationBin_LowDM_HighMET_njetWeight_jetpt20_" + year + "nValidationBinLowDMHighMET_jetpt20nValidationBinLowDMHighMET_jetpt20ZJetsToNuNu Validation Bin Low DM High METdata")
 
 
-if not histo["angel"]["HighDM"]["data"]:
-    print("angel_highDM_data empty")
-if not histo["angel"]["HighDM"]["mc"]:
-    print("angel_highDM_mc empty")
-if not histo["angel"]["HighDM"]["pred"]:
-    print("angel_highDM_pred empty")
-
-if not h_lowdm_lower["data"]:
-    print("lowdm_lower_data empty")
-if not h_lowdm_lower["mc"]:
-    print("lowdm_lower_mc empty")
-if not h_lowdm_lower["pred"]:
-    print("lowdm_lower_pred empty")
-
-if not h_lowdm_upper["data"]:
-    print("lowdm_upper_data empty")
-if not h_lowdm_upper["mc"]:
-    print("lowdm_upper_mc empty")
-if not h_lowdm_upper["pred"]:
-    print("lowdm_upper_pred empty")
-
 #--------------------------------------------------------------------------------------------------------------
 # LowDM lower-upper merge 
 #--------------------------------------------------------------------------------------------------------------
@@ -98,7 +78,7 @@ for plot in plots:
         histo["angel"]["LowDM"][plot].SetBinError( k, da )
 
 #--------------------------------------------------------------------------------------------------------------
-# Load caleb histograms
+# Load caleb's histograms
 #--------------------------------------------------------------------------------------------------------------
 
 histo["caleb"]["HighDM"]["data"]  =  caleb_file.Get("data_highdm")
@@ -158,5 +138,53 @@ for region in regions:
         file_name = "validation_" + region + "_" + year + "_" + plot + "_angel_caleb_comparison" 
         c.SaveAs(file_name + ".png")
     
+#--------------------------------------------------------------------------------------------------------------
+# z-score 
+#--------------------------------------------------------------------------------------------------------------
+
+for region in regions:
+
+    if region == "LowDM":
+        nbins = 19 
+        start = 0
+        end   = 19
+    else:
+        nbins = 24
+        start = 19
+        end   = 43
+
+    z_score = ROOT.TH1F( 'z_score', 'z-score ' + region, nbins, start, end )
+
+    for k in range(1, nbins + 1):
+    
+        a = histo['angel'][region]['pred'].GetBinContent(k)
+        da = histo['angel'][region]['pred'].GetBinError(k)
+
+        b = histo['caleb'][region]['pred'].GetBinContent(k)
+        db = histo['caleb'][region]['pred'].GetBinError(k)
+
+        # print("bin = {}  |  a = {} +- {}  |  b = {} +- {}".format(k, a, da, b, db) ),
+
+        z = (a-b)/m.sqrt((da**2) + (db**2))
+       
+        # print( "z_score value for bin {} is: {}".format(k, z) ) # debbuging
+
+        z_score.SetBinContent(k, z)
+        
+    # draw histograms
+    canvas = ROOT.TCanvas("c", "c", 800, 800)
+
+    # legend: TLegend(x1,y1,x2,y2)
+    legend_x1 = 0.7
+    legend_x2 = 0.9 
+    legend_y1 = 0.7 
+    legend_y2 = 0.9 
+
+    z_score.Draw("hist")
+    canvas.Update()
+    file_name = "z_score" + region + "_" + year + "_angel_caleb" 
+    canvas.SaveAs(file_name + ".png")
+
+
 caleb_file.Close()
 angel_file.Close()

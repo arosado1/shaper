@@ -172,14 +172,14 @@ for particle in particles:
 	    h_Shape.Draw('error')
 	    canvas.Update()
 
-# Save new Histogram as png and root
+ #Save new Histogram as png and root
 
-	#    if not metcut:
-        #        file_name = prefix + 'nj_' + year + 'metWithLL_Shape.png'
-        #    else:
-        #        file_name = prefix + '_nj_' + year + 'metWithLL_Shape.png'
+	    if not metcut:
+                file_name = prefix + 'nj_' + year + 'metWithLL_Shape.png'
+            else:
+                file_name = prefix + '_nj_' + year + 'metWithLL_Shape.png'
 
-	#    canvas.SaveAs(file_name)
+	    canvas.SaveAs(file_name)
 
             h_Shape.Write()
 

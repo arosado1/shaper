@@ -1,0 +1,153 @@
+# produce png and root of:
+#    shape factor
+#    prediction factor = shape factor x normalization factor
+# normalization factor is display in pred factor
+
+
+import sys
+import os          #what is this???
+import numpy as np #delete
+import ROOT       
+import json        #delete
+
+# make sure ROOT.TFile.Open(fileURL) does not seg fault when $ is in sys.argv (e.g. $ passed in as argument)
+ROOT.PyConfig.IgnoreCommandLineOptions = True
+# make plots faster without displaying them
+ROOT.gROOT.SetBatch(ROOT.kTRUE)
+
+#----------------------------------------------------
+# open root file and create factors.root
+#----------------------------------------------------
+
+location = sys.argv[1]
+year  = sys.argv[2]
+
+root_file = ROOT.TFile.Open(location)
+in_root = 'nJets_drLeptonCleaned_jetpt30'
+f = ROOT.TFile("factors_njets_" + year + ".root", 'recreate')
+
+#----------------------------------------------------
+# load histograms
+#----------------------------------------------------
+
+particles  =  ['Electron', 'Muon']
+regions    =  ['HighDM', 'LowDM']
+metcuts    =  ['', 'Loose']
+mcdata     =  ['Data', 'DY', 'Sint', 'TTbar', 'Rare']
+factores   =  ['norm', 'shape', 'pred']
+
+# histos[particle][region][metcut][mcdata]
+histos = {p: {r: {m: dict.fromkeys(mcdata) for m in metcuts} for r in regions} for p in particles}
+
+
+for particle in particles:
+    for region in regions:
+        for metcut in metcuts: 
+
+	    print('We are now in: ' + particle + ' ' + region + ' ' + metcut) #debbuging
+
+            err = "{}".format("" if not metcut else "_")
+            prefix = 'DataMC_' + particle + '_' + region + '_' + metcut + err
+
+            for mcd, mcds in zip(mcdata, ['Datadata', 'DYstack', 'Single tstack', 't#bar{t}stack', 'Rarestack']):
+                histos[particle][region][metcut][mcd] = root_file.Get(in_root + '/' + prefix + 'nj_jetpt30_' + year + 'nJets_drLeptonCleaned_jetpt30nJets_drLeptonCleaned_jetpt30' + mcds)
+                
+                if not histos[particle][region][metcut][mcd]:
+		    print(in_root + '/' + histos[particle][region][metcut][mcd] + " doesn't exist!") 
+
+#----------------------------------------------------
+# calculate factors
+#----------------------------------------------------
+
+# shapes[particle][region][factor]
+factors = {p: {r: dict.fromkeys(factores) for r in regions} for p in particles}
+
+for particle in particles:
+    for region in regions:
+
+        #----------------------------------------------------
+        # shape factor
+        #----------------------------------------------------
+
+        factors[particle][region]['shape'] = histos[particle][region]['Loose']['Data'].Clone()
+        factors[particle][region]['shape'].SetName("shape_njets_" + year + "_" + particle + '_' + region + 'Loose')
+        factors[particle][region]['shape'].Add(histos[particle][region]['Loose']['TTbar'], -1)
+        factors[particle][region]['shape'].Add(histos[particle][region]['Loose']['Rare'], -1)
+        factors[particle][region]['shape'].Add(histos[particle][region]['Loose']['Sint'], -1)
+        factors[particle][region]['shape'].Divide( histos[particle][region]['Loose']['DY'] )
+
+        #----------------------------------------------------
+        # normalization factor
+        #----------------------------------------------------
+
+        bin_1  = 0 
+        bin_2 = histos[particle][region]['']['Data'].GetNbinsX()
+        
+        # numerator
+        h_norm = histos[particle][region]['']['Data'].Clone()
+        h_norm.Add(histos[particle][region]['']['TTbar'], -1)
+        h_norm.Add(histos[particle][region]['']['Rare'], -1)
+        h_norm.Add(histos[particle][region]['']['Sint'], -1)
+        numerator = h_norm.Integral(bin_1, bin_2)
+
+        # denominator
+        h_norm = histos[particle][region]['']['DY'].Clone()
+        h_norm.Multiply(factors[particle][region]['shape'])
+        denominator = h_norm.Integral(bin_1, bin_2)
+
+        factors[particle][region]['norm'] = numerator/denominator
+
+        #----------------------------------------------------
+        # prediction factor
+        #----------------------------------------------------
+
+        factors[particle][region]['pred'] = factors[particle][region]['shape'].Clone()
+        factors[particle][region]['pred'].Scale(factors[particle][region]['norm'])
+
+#----------------------------------------------------
+# create root and png
+#----------------------------------------------------
+
+for particle in particles:
+    for region in regions:
+        for factor in ('shape', 'pred'):
+
+            # canvas
+            canvas = ROOT.TCanvas("c", "c", 800, 800)
+    
+            # legend
+            legend = ROOT.TLegend(0.5, 0.7, 0.9, 0.9)
+            legend.AddEntry(factors[particle][region][factor], factor, '1')
+            legend.Draw()
+    
+            # histogram
+            factors[particle][region][factor].GetXaxis().SetRangeUser(2,10)
+            factors[particle][region][factor].GetYaxis().SetRangeUser(0,4)
+            factors[particle][region][factor].Draw('error')
+
+            canvas.Update()
+            factors[particle][region][factor].Write()
+
+            # png
+            file_name = factor + '_' + particle + '_' + region + '_' + year + '.png'
+            canvas.SaveAs(file_name)
+
+            print(file_name)
+    
+
+#----------------------------------------------------
+# corroboration sheet
+#----------------------------------------------------
+
+   #     if False:
+   #         with open('corroboration_sheet_' + particle + '_' + region + '_' + metcut + '.txt', 'w') as sheet:
+   #          sheet.write("bins: 1 to 40\n\n")
+   #          for mcd in mcdata:
+   #              for binn in range(1,40):
+   #                     bin_value = str( histos[particle][region][metcut][mcd].GetBinContent(binn) )
+   #                  sheet.write( bin_value + '  ')
+   #              sheet.write('\n\n')
+
+
+
+f.Close()

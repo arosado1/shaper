@@ -1,4 +1,4 @@
-# njets all
+# produce shapes_njet.root file with shape factors
 
 import sys
 import os

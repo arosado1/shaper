@@ -119,6 +119,13 @@ for particle in particles:
             legend = ROOT.TLegend(0.5, 0.7, 0.9, 0.9)
             legend.AddEntry(factors[particle][region][factor], factor, '1')
             legend.Draw()
+
+            # normalization text box
+            norm_text = ROOT.TText(0.1, 0.1, "Normalization = " + str(factors[particle][region]['norm']))
+            norm_text.SetTextFont(20)
+            norm_text.DrawText(0.1, 0.1, "Normalization = " + str(factors[particle][region]['norm']))
+            t = ROOT.TLatex(-3,500,"TLatex at (-3,500)");
+            t.Draw();
     
             # histogram
             factors[particle][region][factor].GetXaxis().SetRangeUser(2,10)

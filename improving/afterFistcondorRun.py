@@ -3,12 +3,10 @@
 #    prediction factor = shape factor x normalization factor
 # normalization factor is display in pred factor
 
-
 import sys
 import os          #what is this???
-import numpy as np #delete
 import ROOT       
-import json        #delete
+import math as m
 
 # make sure ROOT.TFile.Open(fileURL) does not seg fault when $ is in sys.argv (e.g. $ passed in as argument)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
@@ -34,7 +32,7 @@ particles  =  ['Electron', 'Muon']
 regions    =  ['HighDM', 'LowDM']
 metcuts    =  ['', 'Loose']
 mcdata     =  ['Data', 'DY', 'Sint', 'TTbar', 'Rare']
-factores   =  ['norm', 'shape', 'pred']
+factores   =  ['norm', 'shape', 'pred', 'combine']
 
 # histos[particle][region][metcut][mcdata]
 histos = {p: {r: {m: dict.fromkeys(mcdata) for m in metcuts} for r in regions} for p in particles}
@@ -105,13 +103,53 @@ for particle in particles:
         factors[particle][region]['pred'].Scale(factors[particle][region]['norm'])
 
 #----------------------------------------------------
+# combine prediction factor
+#----------------------------------------------------
+
+for region in regions:
+
+    nbins  =  10
+    start   =  0
+    end     =  10
+    name    =  "njets_pred_" + year + "_Combine_"  + region
+
+    factors['Electron'][region]['combine']  =  ROOT.TH1F( name, name, nbins, start, end)
+    factors['Muon'][region]['combine']  =  ROOT.TH1F( name, name, nbins, start, end)
+    
+    for k in range(1, 11):
+    
+        e   =  factors['Electron'][region]['pred'].GetBinContent(k)
+        de  =  factors['Electron'][region]['pred'].GetBinError(k)
+        u   =  factors['Muon'][region]['pred'].GetBinContent(k)
+        du  =  factors['Muon'][region]['pred'].GetBinError(k)
+    
+        if de == 0:
+            factors['Electron'][region]['combine'].SetBinContent(k, 0)
+            factors['Electron'][region]['combine'].SetBinError(k, 0)
+            factors['Muon'][region]['combine'].SetBinContent(k, 0)
+            factors['Muon'][region]['combine'].SetBinError(k, 0)
+            continue
+        else:
+            we = (1/de)**2
+    
+        wu = (1/du)**2
+
+        c   =  (e * we + u * wu)/(we + wu) 
+        dc  =   1/m.sqrt(we + wu)
+    
+        factors['Electron'][region]['combine'].SetBinContent(k, c)
+        factors['Electron'][region]['combine'].SetBinError(k, dc)
+        factors['Muon'][region]['combine'].SetBinContent(k, c)
+        factors['Muon'][region]['combine'].SetBinError(k, dc)
+
+#----------------------------------------------------
 # create root and png
 #----------------------------------------------------
 
 for particle in particles:
     for region in regions:
-        for factor in ('shape', 'pred'):
-
+        for factor in ('shape', 'pred', 'combine'):
+      
             # canvas
             canvas = ROOT.TCanvas("c", "c", 800, 800)
     
@@ -120,7 +158,7 @@ for particle in particles:
             legend.AddEntry(factors[particle][region][factor], factor, '1')
             legend.Draw()
 
-            # normalization text box
+            # normalization text box (not working)
             norm_text = ROOT.TText(0.1, 0.1, "Normalization = " + str(factors[particle][region]['norm']))
             norm_text.SetTextFont(20)
             norm_text.DrawText(0.1, 0.1, "Normalization = " + str(factors[particle][region]['norm']))
@@ -141,7 +179,6 @@ for particle in particles:
 
             print(file_name)
     
-
 #----------------------------------------------------
 # corroboration sheet
 #----------------------------------------------------

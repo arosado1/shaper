@@ -68,7 +68,7 @@ for particle in particles:
         #----------------------------------------------------
 
         factors[particle][region]['shape'] = histos[particle][region]['Loose']['Data'].Clone()
-        factors[particle][region]['shape'].SetName("shape_njets_" + year + "_" + particle + '_' + region + 'Loose')
+        factors[particle][region]['shape'].SetName("shape_njets_" + year + "_" + particle + '_' + region + '_Loose')
         factors[particle][region]['shape'].Add(histos[particle][region]['Loose']['TTbar'], -1)
         factors[particle][region]['shape'].Add(histos[particle][region]['Loose']['Rare'], -1)
         factors[particle][region]['shape'].Add(histos[particle][region]['Loose']['Sint'], -1)
@@ -101,6 +101,7 @@ for particle in particles:
 
         factors[particle][region]['pred'] = factors[particle][region]['shape'].Clone()
         factors[particle][region]['pred'].Scale(factors[particle][region]['norm'])
+        factors[particle][region]['pred'].SetName("prediction_njets_" + year + "_" + particle + '_' + region + '_Loose')
 
 #----------------------------------------------------
 # combine prediction factor
@@ -109,9 +110,9 @@ for particle in particles:
 for region in regions:
 
     nbins  =  10
-    start   =  0
-    end     =  10
-    name    =  "njets_pred_" + year + "_Combine_"  + region
+    start  =  0
+    end    =  10
+    name   =  "prediction_njets_" + year + "_Combine_"  + region
 
     factors['Electron'][region]['combine']  =  ROOT.TH1F( name, name, nbins, start, end)
     factors['Muon'][region]['combine']  =  ROOT.TH1F( name, name, nbins, start, end)
@@ -149,6 +150,9 @@ for region in regions:
 for particle in particles:
     for region in regions:
         for factor in ('shape', 'pred', 'combine'):
+
+            if (factor == 'combine' and particle == 'Muon'):
+                continue
       
             # canvas
             canvas = ROOT.TCanvas("c", "c", 800, 800)
@@ -159,11 +163,11 @@ for particle in particles:
             legend.Draw()
 
             # normalization text box (not working)
-            norm_text = ROOT.TText(0.1, 0.1, "Normalization = " + str(factors[particle][region]['norm']))
-            norm_text.SetTextFont(20)
-            norm_text.DrawText(0.1, 0.1, "Normalization = " + str(factors[particle][region]['norm']))
-            t = ROOT.TLatex(-3,500,"TLatex at (-3,500)");
-            t.Draw();
+            # norm_text = ROOT.TText(0.1, 0.1, "Normalization = " + str(factors[particle][region]['norm']))
+            # norm_text.SetTextFont(20)
+            # norm_text.DrawText(0.1, 0.1, "Normalization = " + str(factors[particle][region]['norm']))
+            # t = ROOT.TLatex(-3,500,"TLatex at (-3,500)");
+            # t.Draw();
     
             # histogram
             factors[particle][region][factor].GetXaxis().SetRangeUser(2,10)

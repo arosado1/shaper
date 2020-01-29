@@ -13,10 +13,10 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 # Open root file
 #--------------------------------------------------------------------------------------------------------------
 
-file_location = sys.argv[1]
-year          = sys.argv[2] 
+file_location  =  sys.argv[1]
+year           =  sys.argv[2] 
 
-angel_file = ROOT.TFile.Open(file_1_location, 'read')
+rootfile = ROOT.TFile.Open(file_location, 'read')
 
 #--------------------------------------------------------------------------------------------------------------
 # Setting histo maps 
@@ -24,106 +24,86 @@ angel_file = ROOT.TFile.Open(file_1_location, 'read')
 val        =  'nValidationBin'
 variables  =  ['', 'nj', 'ht', 'met']
 regions    =  ['LowDM', 'LowDMHighMET', 'HighDM']
-branches   =  [ val + s for s in [ r + '_jetpt30' for r in regions ] ]
+branches   =  [ val + s for s in [ 'LowDM_jetpt30', 'LowDM_HighMET_jetpt30', 'HighDM_jetpt30']]
 
 # histo[variable][region]
-histo = {v:dict.fromkeys(region) for v in variables}
+histo = {v:dict.fromkeys(regions) for v in variables}
 
 # ZNuNu_nValidationBin_HighDM_nj_shape_jetpt30nValidationBinHighDM_jetpt30nValidationBinHighDM_jetpt30ZJetsToNuNu Validation Bin High DMdata
 
 #--------------------------------------------------------------------------------------------------------------
-# Load angel histograms
+# Loading histograms
 #--------------------------------------------------------------------------------------------------------------
 
 for branch, region in zip(branches,regions):
     for variable in variables:
       
-        dash = ['ZNuNu', val, region, variable, 'shape_jetpt30', branch, branch]
-        histo_name = '_'.join(dash) + "ZJetsToNuNu Validation Bin High DMdata"
-        histo[variable][region]  =  file_location.Get(branch + "/" + histo_name)
+        err = "{}".format("" if not variable else "_shape_")
+        histo[variable]['HighDM'] = rootfile.Get('nValidationBinHighDM_jetpt30/ZNuNu_nValidationBin_HighDM_' + variable + err + 'jetpt30nValidationBinHighDM_jetpt30nValidationBinHighDM_jetpt30ZJetsToNuNu Validation Bin High DMdata')
+        histo[variable]['LowDMHighMET'] = rootfile.Get('nValidationBinLowDMHighMET_jetpt30/ZNuNu_nValidationBin_LowDM_HighMET_' + variable + err + 'jetpt30nValidationBinLowDMHighMET_jetpt30nValidationBinLowDMHighMET_jetpt30ZJetsToNuNu Validation Bin Low DM High METdata')
+        histo[variable]['LowDM'] = rootfile.Get('nValidationBinLowDM_jetpt30/ZNuNu_nValidationBin_LowDM_' + variable + err + 'jetpt30nValidationBinLowDM_jetpt30nValidationBinLowDM_jetpt30ZJetsToNuNu Validation Bin Low DMdata')
 
-        if (histo[variable][region]):
-            print("Error, histogram doesn't exist: " + branch + '/' + histo_name)
+        if not (histo[variable][region]):
+            print("Error, histogram doesn't exist: {}, {}").format(region, variable)
 
 #--------------------------------------------------------------------------------------------------------------
-# LowDM lower-upper merge 
+# merging LowDM with LowDMHighMET 
 #--------------------------------------------------------------------------------------------------------------
 
-for plot in plots:
+for variable in variables:
 
-    histo["angel"]["LowDM"][plot] =  ROOT.TH1F( "nValidationBinLowDM_jetpt30",  "nValidationBinLowDM_jetpt30", 19, 0, 19)
+    temp_histo  =  ROOT.TH1F( "nValidationBinLowDM_jetpt30",  "nValidationBinLowDM_jetpt30", 19, 0, 19)
 
     for k in range(1,20):
 
         if k >= 16:
-            a   =  h_lowdm_upper[plot].GetBinContent(k-15)
-            da  =  h_lowdm_upper[plot].GetBinError(k-15)
+            a   =  histo[variable]['LowDMHighMET'].GetBinContent(k-15)
+            da  =  histo[variable]['LowDMHighMET'].GetBinError(k-15)
         else:
-            a   =  h_lowdm_lower[plot].GetBinContent(k)
-            da  =  h_lowdm_lower[plot].GetBinError(k)
+            a   =  histo[variable]['LowDM'].GetBinContent(k)
+            da  =  histo[variable]['LowDM'].GetBinError(k)
 
-        histo["angel"]["LowDM"][plot].SetBinContent( k, a )
-        histo["angel"]["LowDM"][plot].SetBinError( k, da )
+        temp_histo.SetBinContent( k, a )
+        temp_histo.SetBinError( k, da )
 
-#--------------------------------------------------------------------------------------------------------------
-# Load caleb's histograms
-#--------------------------------------------------------------------------------------------------------------
-
-histo["caleb"]["HighDM"]["data"]  =  caleb_file.Get("data_highdm")
-histo["caleb"]["HighDM"]["mc"]    =  caleb_file.Get("mc_highdm")
-histo["caleb"]["HighDM"]["pred"]  =  caleb_file.Get("pred_highdm")
-
-histo["caleb"]["LowDM"]["data"]  =  caleb_file.Get("data_lowdm")
-histo["caleb"]["LowDM"]["mc"]    =  caleb_file.Get("mc_lowdm")
-histo["caleb"]["LowDM"]["pred"]  =  caleb_file.Get("pred_lowdm")
+    histo[variable]['LowDM'] = temp_histo.Clone()
 
 #--------------------------------------------------------------------------------------------------------------
-# z-score 
+# Systematics 
 #--------------------------------------------------------------------------------------------------------------
-
-z_score = {region:dict.fromkeys(plots) for region in regions}
-
 for region in regions:
-    for plot in plots:
+    c = ROOT.TCanvas("c", "c", 800, 800)
+    syst = dict.fromkeys(variables) 
+    syst['met'] = histo['met'][region].Clone()
+    syst['met'].Divide(histo['nj'][region]) 
 
-        if region == "LowDM":
-            nbins = 19 
-            start = 0
-            end   = 19
-        else:
-            nbins = 24
-            start = 19
-            end   = 43
+    syst['ht'] = histo['ht'][region].Clone()
+    syst['ht'].Divide(histo['nj'][region]) 
 
-        z_score[region][plot] = ROOT.TH1F( 'z_score', 'z-score ' + region + '_' + plot, nbins, start, end )
-
-        for k in range(1, nbins + 1):
-        
-            a  = histo['angel'][region][plot].GetBinContent(k)
-            da = histo['angel'][region][plot].GetBinError(k)
-
-            b  = histo['caleb'][region][plot].GetBinContent(k)
-            db = histo['caleb'][region][plot].GetBinError(k)
-
-            # print("bin = {}  |  a = {} +- {}  |  b = {} +- {}".format(k, a, da, b, db) ) # debbuging
-
-            z = (a-b)/m.sqrt((da**2) + (db**2))
-           
-            # print( "z_score value for bin {} is: {}".format(k, z) ) # debbuging
-
-            z_score[region][plot].SetBinContent(k, z)
-
+    syst['ht'].Draw(" hist")
+    syst['ht'].SetLineColor(ROOT.kBlue)
+    syst['met'].Draw(" same hist")
+    syst['met'].SetLineColor(ROOT.kRed)
+    legend_x1 = 0.7
+    legend_x2 = 0.9 
+    legend_y1 = 0.7 
+    legend_y2 = 0.9 
+    legend = ROOT.TLegend(legend_x1, legend_y1, legend_x2, legend_y2)
+    legend.AddEntry(syst['met'], "met ", "l")
+    legend.AddEntry(syst['ht'], "ht ", "l")
+    legend.Draw()
+    c.Update()
+    file_name = "systematic_" + region
+    c.SaveAs(file_name + ".png")
 
 #--------------------------------------------------------------------------------------------------------------
 # Canvas 
 #--------------------------------------------------------------------------------------------------------------
 
 for region in regions:
-    for plot in plots:
 
         # draw histograms
         c = ROOT.TCanvas("c", "c", 800, 800)
-        c.Divide(1, 2)
         
         # legend: TLegend(x1,y1,x2,y2)
         legend_x1 = 0.7
@@ -135,30 +115,33 @@ for region in regions:
         # setupHist(h_ratio, "Z to Invisible Prediction / MC", "x_tiTle", "Pred / MC", "aqua", 0.5, 1.5)
         
         # histograms
-        c.cd(1)
-        ROOT.gPad.SetLogy(1) # set log y
+        # set log y-axis
+        ROOT.gPad.SetLogy(1)
     
         # ZInv MC and Prediction
-        histo["angel"][region][plot].Draw("hist error")
-        histo["angel"][region][plot].SetLineColor(ROOT.kBlue)
+        histo[''][region].Draw("hist error")
+        histo[''][region].SetLineColor(ROOT.kBlack)
+
+        histo['nj'][region].Draw("hist error same")
+        histo['nj'][region].SetLineColor(ROOT.kBlue)
     
-        histo["caleb"][region][plot].Draw("error same hist")
-        histo["caleb"][region][plot].SetLineColor(ROOT.kRed)
+        histo["ht"][region].Draw("error same hist")
+        histo["ht"][region].SetLineColor(ROOT.kRed)
         
+        histo["met"][region].Draw("error same hist")
+        histo["met"][region].SetLineColor(ROOT.kGreen)
+
         # legend: TLegend(x1,y1,x2,y2)
         legend = ROOT.TLegend(legend_x1, legend_y1, legend_x2, legend_y2)
-        legend.AddEntry(histo["angel"][region][plot], "Z#rightarrow#nu#nu angel " + plot, "l")
-        legend.AddEntry(histo["caleb"][region][plot], "Z#rightarrow#nu#nu caleb " + plot, "l")
+        legend.AddEntry(histo[''][region], "data ", "l")
+        legend.AddEntry(histo['nj'][region], "nj ", "l")
+        legend.AddEntry(histo['ht'][region], "ht ", "l")
+        legend.AddEntry(histo['met'][region], "met ", "l")
         legend.Draw()
         
-        # ratios
-        c.cd(2)
-        z_score[region][plot].Draw("hist")
-            
         # save histograms
         c.Update()
-        file_name = "validation_" + region + "_" + year + "_" + plot + "_angel_caleb_comparison" 
+        file_name = "validations_" + region
         c.SaveAs(file_name + ".png")
     
-caleb_file.Close()
-angel_file.Close()
+rootfile.Close()

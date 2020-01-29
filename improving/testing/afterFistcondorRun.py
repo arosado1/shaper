@@ -62,10 +62,10 @@ for variable, trueVariable in zip(variables, trueVariables):
                     # DataMC_Electron_LowDM_ht_jetpt30HT_drLeptonCleaned_jetpt30HT_drLeptonCleaned_jetpt30Datadata
                     # DataMC_Electron_LowDM_met_jetpt30metWithLLmetWithLLDatadata
     
-                    histos[variable][particle][region][metcut][mcd] = root_file.Get(trueVariable + '/' + prefix + variable + '_jetpt30_' + year + 2*trueVariable + mcds)
+                    histos[variable][particle][region][metcut][mcd] = root_file.Get(trueVariable + '/' + prefix + variable + '_jetpt30' + 2*trueVariable + mcds)
                     
                     if not histos[variable][particle][region][metcut][mcd]:
-    		        print(trueVariable + '/' + prefix + variable + '_jetpt30_' + year + 2*trueVariable + mcds + " doesn't exist!") 
+    		        print(trueVariable + '/' + prefix + variable + '_jetpt30' + 2*trueVariable + mcds + " doesn't exist!") 
     
 #-----------------------------------------------------------------------------------------------------------------
 # calculate factors

@@ -69,6 +69,34 @@ for variable in variables:
     histo[variable]['LowDM'] = temp_histo.Clone()
 
 #--------------------------------------------------------------------------------------------------------------
+# Systematics 
+#--------------------------------------------------------------------------------------------------------------
+for region in regions:
+    c = ROOT.TCanvas("c", "c", 800, 800)
+    syst = dict.fromkeys(variables) 
+    syst['met'] = histo['met'][region].Clone()
+    syst['met'].Divide(histo['nj'][region]) 
+
+    syst['ht'] = histo['ht'][region].Clone()
+    syst['ht'].Divide(histo['nj'][region]) 
+
+    syst['ht'].Draw(" hist")
+    syst['ht'].SetLineColor(ROOT.kBlue)
+    syst['met'].Draw(" same hist")
+    syst['met'].SetLineColor(ROOT.kRed)
+    legend_x1 = 0.7
+    legend_x2 = 0.9 
+    legend_y1 = 0.7 
+    legend_y2 = 0.9 
+    legend = ROOT.TLegend(legend_x1, legend_y1, legend_x2, legend_y2)
+    legend.AddEntry(syst['met'], "met ", "l")
+    legend.AddEntry(syst['ht'], "ht ", "l")
+    legend.Draw()
+    c.Update()
+    file_name = "systematic_" + region
+    c.SaveAs(file_name + ".png")
+
+#--------------------------------------------------------------------------------------------------------------
 # Canvas 
 #--------------------------------------------------------------------------------------------------------------
 

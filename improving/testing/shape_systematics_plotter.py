@@ -75,9 +75,11 @@ for region in regions:
     c = ROOT.TCanvas("c", "c", 800, 800)
     syst = dict.fromkeys(variables) 
     syst['met'] = histo['met'][region].Clone()
+    syst['met'].Add(histo['nj'][region], -1)
     syst['met'].Divide(histo['nj'][region]) 
 
     syst['ht'] = histo['ht'][region].Clone()
+    syst['ht'].Add(histo['nj'][region], -1)
     syst['ht'].Divide(histo['nj'][region]) 
 
     syst['ht'].Draw(" hist")

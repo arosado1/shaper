@@ -1,7 +1,6 @@
 # plot nValidation bins with different shapes factors applied (aka shape systematics) 
 
 import sys 
-import os
 import ROOT
 from LoadHistograms import *
 

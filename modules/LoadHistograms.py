@@ -10,7 +10,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 #ROOT.PyConfig.fAddDirectory(kFalse)
 
 def LoadBinHisto(location):
-    """Load histograms from result.root"""
+    """Load Validation and Search bins histograms"""
 
     root_file = ROOT.TFile.Open(location)
 
@@ -36,8 +36,7 @@ def LoadBinHisto(location):
 
                 histos[binn][variable][region] = root_file.Get(branch + "/" + histogram)
                 if not histos[binn][variable][region]:
-                    print("Error, histogram doesn't exist:")
-                    print( branch + "/" + histogram )
+                    print("Error, histogram doesn't exist: branch: {} \nhistogram: {}").format(branch, histogram)
                 histos[binn][variable][region].SetDirectory(0)                
 
     root_file.Close()

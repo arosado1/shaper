@@ -1,72 +1,27 @@
 # plot prediction vs data (validation bins) from results.root 
 
-import sys 
-import os
 import ROOT
+import sys 
+sys.path.append('./modules')
+from LoadHistograms import *
 # from tools import setupHist, getMultiplicationErrorList, removeCuts, getBinError, ERROR_ZERO, getTexSelection, getTexMultiCut
 
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 #--------------------------------------------------------------------------------------------------------------
-# Open root file
+# Load Histograms
 #--------------------------------------------------------------------------------------------------------------
 
-file_location = sys.argv[1]
-year = sys.argv[2] 
+location  =  sys.argv[1]
+year      =  sys.argv[2] 
 
-root_file = ROOT.TFile.Open(file_location, 'read')
+regions    =  ['Low', 'High']
+variables  =  ['','nj','ht','met']
+plots      =  ['mc', 'pred']
 
-#--------------------------------------------------------------------------------------------------------------
-# HighDM histo 
-#--------------------------------------------------------------------------------------------------------------
-
-regions = ['LowDM', 'HighDM']
-plots = ['mc', 'pred']
-
-histo = {}
-for region in regions:
-    histo[region] = dict.fromkeys(plots)
-
-#--------------------------------------------------------------------------------------------------------------
-# Load histograms
-#--------------------------------------------------------------------------------------------------------------
-
-lowdm_lower_file  =  "nValidationBinLowDM_jetpt30"
-lowdm_upper_file  =  "nValidationBinLowDMHighMET_jetpt30"
-highdm_file       =  "nValidationBinHighDM_jetpt30"
-
-histo["HighDM"]["mc"]  =  root_file.Get(highdm_file + "/" + "ZNuNu_nValidationBin_HighDM_jetpt30_" + year + "nValidationBinHighDM_jetpt30nValidationBinHighDM_jetpt30ZJetsToNuNu Validation Bin High DMdata")
-histo["HighDM"]["pred"]  =  root_file.Get(highdm_file + "/" + "ZNuNu_nValidationBin_HighDM_njetWeight_jetpt30_" + year + "nValidationBinHighDM_jetpt30nValidationBinHighDM_jetpt30ZJetsToNuNu Validation Bin High DMdata")
-
-h_lowdm_lower = dict.fromkeys(plots)
-h_lowdm_upper = dict.fromkeys(plots)
-
-h_lowdm_lower["mc"]    = root_file.Get( lowdm_lower_file + "/" + "ZNuNu_nValidationBin_LowDM_jetpt30_" + year + "nValidationBinLowDM_jetpt30nValidationBinLowDM_jetpt30ZJetsToNuNu Validation Bin Low DMdata")
-h_lowdm_lower["pred"]  = root_file.Get( lowdm_lower_file + "/" + "ZNuNu_nValidationBin_LowDM_njetWeight_jetpt30_" + year + "nValidationBinLowDM_jetpt30nValidationBinLowDM_jetpt30ZJetsToNuNu Validation Bin Low DMdata")
-
-h_lowdm_upper["mc"]    = root_file.Get( lowdm_upper_file + "/" + "ZNuNu_nValidationBin_LowDM_HighMET_jetpt30_" + year + "nValidationBinLowDMHighMET_jetpt30nValidationBinLowDMHighMET_jetpt30ZJetsToNuNu Validation Bin Low DM High METdata") 
-h_lowdm_upper["pred"]  = root_file.Get( lowdm_upper_file + "/" + "ZNuNu_nValidationBin_LowDM_HighMET_njetWeight_jetpt30_" + year + "nValidationBinLowDMHighMET_jetpt30nValidationBinLowDMHighMET_jetpt30ZJetsToNuNu Validation Bin Low DM High METdata")
-
-#--------------------------------------------------------------------------------------------------------------
-# LowDM lower-upper merge 
-#--------------------------------------------------------------------------------------------------------------
-
-for plot in plots:
-
-    histo["LowDM"][plot] =  ROOT.TH1F( "nValidationBinLowDM_jetpt30", "nValidationBinLowDM_jetpt30", 19, 0, 19)
-
-    for k in range(1,20):
-    
-        if k >= 16: 
-            a   =  h_lowdm_upper[plot].GetBinContent(k-15)
-            da  =  h_lowdm_upper[plot].GetBinError(k-15) 
-        else:
-            a   =  h_lowdm_lower[plot].GetBinContent(k)
-            da  =  h_lowdm_lower[plot].GetBinError(k) 
-    
-        histo["LowDM"][plot].SetBinContent( k, a )
-        histo["LowDM"][plot].SetBinError( k, da )
+# histo['Validation'][variable][region]
+histo = LoadBinHisto(location)
 
 #--------------------------------------------------------------------------------------------------------------
 # Canvas 
@@ -84,8 +39,8 @@ for region in regions:
     legend_y1 = 0.7 
     legend_y2 = 0.9 
     
-    h_ratio = histo[region]["pred"].Clone("h_ratio")
-    h_ratio.Divide(histo[region]["mc"])
+    h_ratio = histo['Validation']['nj'][region].Clone("h_ratio")
+    h_ratio.Divide(histo['Validation'][''][region])
     
     # setupHist(h_ratio, "Z to Invisible Prediction / MC", "x_tiTle", "Pred / MC", "aqua", 0.5, 1.5)
     h_ratio.SetLineColor(ROOT.kBlue)
@@ -95,16 +50,16 @@ for region in regions:
     ROOT.gPad.SetLogy(1) # set log y
 
     # ZInv MC and Prediction
-    histo[region]["mc"].Draw("hist error")
-    histo[region]["mc"].SetLineColor(ROOT.kRed)
+    histo['Validation'][""][region].SetLineColor(ROOT.kRed)
+    histo['Validation'][""][region].Draw("hist error")
     
-    histo[region]["pred"].SetLineColor(ROOT.kBlue)
-    histo[region]["pred"].Draw("error same hist")
+    histo['Validation']["nj"][region].SetLineColor(ROOT.kBlue)
+    histo['Validation']["nj"][region].Draw("error same hist")
     
     # legend: TLegend(x1,y1,x2,y2)
     legend = ROOT.TLegend(legend_x1, legend_y1, legend_x2, legend_y2)
-    legend.AddEntry( histo[region]["mc"],   "Z#rightarrow#nu#nu MC",   "l")
-    legend.AddEntry( histo[region]["pred"], "Z#rightarrow#nu#nu Pred", "l")
+    legend.AddEntry( histo['Validation'][""][region],   "Z#rightarrow#nu#nu MC",   "l")
+    legend.AddEntry( histo['Validation']["nj"][region], "Z#rightarrow#nu#nu Pred", "l")
     legend.Draw()
     
     # ratios
@@ -114,5 +69,3 @@ for region in regions:
     # save histograms
     c.Update()
     c.SaveAs("validation_" + region +  "_" + year + "_mc_pred_ratio.png")
-
-root_file.Close()

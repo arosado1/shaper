@@ -1,93 +1,53 @@
 # comparison between angel and caleb data, mc and pred in the validation bins 
 
-import sys 
-import os
 import ROOT
 import math as m
+import sys 
+sys.path.append('./modules')
+from LoadHistograms import *
 # from ROOT import kBlue, kRed
 
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
-#--------------------------------------------------------------------------------------------------------------
-# Open root file
-#--------------------------------------------------------------------------------------------------------------
 
 file_1_location = sys.argv[1]
 file_2_location = sys.argv[2]
 year = sys.argv[3] 
 
-angel_file = ROOT.TFile.Open(file_1_location, 'read')
+names    =  ['angel', 'caleb']
+regions  =  ['Low', 'High']
+plots    =  ['mc', 'pred']
+
+# histo[name][region][plot]
+histo = { n:{ r: dict.fromkeys(plots) for r in regions } for n in names }
+
+#--------------------------------------------------------------------------------------------------------------
+# Loading Angel's Histograms 
+#--------------------------------------------------------------------------------------------------------------
+
+# histo['Validation'][variable][region]
+temp = LoadBinHisto(file_1_location)
+
+histo['angel']['High']['mc']    = temp['Validation']['']['High'] 
+histo['angel']['High']['pred']  = temp['Validation']['nj']['High']
+
+histo['angel']['Low']['mc']     = temp['Validation']['']['Low'] 
+histo['angel']['Low']['pred']   = temp['Validation']['nj']['Low']
+
+#--------------------------------------------------------------------------------------------------------------
+# Loading's Caleb Histograms 
+#--------------------------------------------------------------------------------------------------------------
+
 caleb_file = ROOT.TFile.Open(file_2_location, 'read')
 
-#--------------------------------------------------------------------------------------------------------------
-# Setting histo maps 
-#--------------------------------------------------------------------------------------------------------------
+histo['caleb']["High"]["data"]  =  caleb_file.Get("data_highdm")
+histo['caleb']["High"]["mc"]    =  caleb_file.Get("mc_highdm")
+histo['caleb']["High"]["pred"]  =  caleb_file.Get("pred_highdm")
 
-names =    ['angel', 'caleb']
-regions =  ['LowDM', 'HighDM']
-plots =    ['data', 'mc', 'pred']
-
-histo = {name:{region:dict.fromkeys(plots) for region in regions} for name in names} # histo[name][region][plot] 
-h_lowdm_lower = dict.fromkeys(plots)
-h_lowdm_upper = dict.fromkeys(plots)
-
-#--------------------------------------------------------------------------------------------------------------
-# Load angel histograms
-#--------------------------------------------------------------------------------------------------------------
-
-
-lowdm_lower_file  =  "nValidationBinLowDM_jetpt30"
-lowdm_upper_file  =  "nValidationBinLowDMHighMET_jetpt30"
-highdm_file       =  "nValidationBinHighDM_jetpt30"
-
-
-histo["angel"]['HighDM']["data"]  =  angel_file.Get(highdm_file + "/" + "MET_nValidationBin_HighDM_jetpt30_" + year + "nValidationBinHighDM_jetpt30nValidationBinHighDM_jetpt30Data MET Validation Bin High DMdata")
-histo["angel"]["HighDM"]["mc"]    =  angel_file.Get(highdm_file + "/" + "ZNuNu_nValidationBin_HighDM_jetpt30_" + year + "nValidationBinHighDM_jetpt30nValidationBinHighDM_jetpt30ZJetsToNuNu Validation Bin High DMdata")
-histo["angel"]["HighDM"]["pred"]  =  angel_file.Get(highdm_file + "/" + "ZNuNu_nValidationBin_HighDM_njetWeight_jetpt30_" + year + "nValidationBinHighDM_jetpt30nValidationBinHighDM_jetpt30ZJetsToNuNu Validation Bin High DMdata")
-
-
-h_lowdm_lower["data"]  =  angel_file.Get( lowdm_lower_file + "/" + "MET_nValidationBin_LowDM_jetpt30_" + year + "nValidationBinLowDM_jetpt30nValidationBinLowDM_jetpt30Data MET Validation Bin Low DMdata")
-h_lowdm_lower["mc"]    =  angel_file.Get( lowdm_lower_file + "/" + "ZNuNu_nValidationBin_LowDM_jetpt30_" + year + "nValidationBinLowDM_jetpt30nValidationBinLowDM_jetpt30ZJetsToNuNu Validation Bin Low DMdata")
-h_lowdm_lower["pred"]  =  angel_file.Get( lowdm_lower_file + "/" + "ZNuNu_nValidationBin_LowDM_njetWeight_jetpt30_" + year + "nValidationBinLowDM_jetpt30nValidationBinLowDM_jetpt30ZJetsToNuNu Validation Bin Low DMdata")
-
-
-h_lowdm_upper["data"]  =  angel_file.Get( lowdm_upper_file + "/" + "MET_nValidationBin_LowDM_HighMET_jetpt30_" + year + "nValidationBinLowDMHighMET_jetpt30nValidationBinLowDMHighMET_jetpt30Data MET Validation Bin Low DM High METdata")
-h_lowdm_upper["mc"]    =  angel_file.Get( lowdm_upper_file + "/" + "ZNuNu_nValidationBin_LowDM_HighMET_jetpt30_" + year + "nValidationBinLowDMHighMET_jetpt30nValidationBinLowDMHighMET_jetpt30ZJetsToNuNu Validation Bin Low DM High METdata")
-h_lowdm_upper["pred"]  =  angel_file.Get( lowdm_upper_file + "/" + "ZNuNu_nValidationBin_LowDM_HighMET_njetWeight_jetpt30_" + year + "nValidationBinLowDMHighMET_jetpt30nValidationBinLowDMHighMET_jetpt30ZJetsToNuNu Validation Bin Low DM High METdata")
-
-
-#--------------------------------------------------------------------------------------------------------------
-# LowDM lower-upper merge 
-#--------------------------------------------------------------------------------------------------------------
-
-for plot in plots:
-
-    histo["angel"]["LowDM"][plot] =  ROOT.TH1F( "nValidationBinLowDM_jetpt30",  "nValidationBinLowDM_jetpt30", 19, 0, 19)
-
-    for k in range(1,20):
-
-        if k >= 16:
-            a   =  h_lowdm_upper[plot].GetBinContent(k-15)
-            da  =  h_lowdm_upper[plot].GetBinError(k-15)
-        else:
-            a   =  h_lowdm_lower[plot].GetBinContent(k)
-            da  =  h_lowdm_lower[plot].GetBinError(k)
-
-        histo["angel"]["LowDM"][plot].SetBinContent( k, a )
-        histo["angel"]["LowDM"][plot].SetBinError( k, da )
-
-#--------------------------------------------------------------------------------------------------------------
-# Load caleb's histograms
-#--------------------------------------------------------------------------------------------------------------
-
-histo["caleb"]["HighDM"]["data"]  =  caleb_file.Get("data_highdm")
-histo["caleb"]["HighDM"]["mc"]    =  caleb_file.Get("mc_highdm")
-histo["caleb"]["HighDM"]["pred"]  =  caleb_file.Get("pred_highdm")
-
-histo["caleb"]["LowDM"]["data"]  =  caleb_file.Get("data_lowdm")
-histo["caleb"]["LowDM"]["mc"]    =  caleb_file.Get("mc_lowdm")
-histo["caleb"]["LowDM"]["pred"]  =  caleb_file.Get("pred_lowdm")
+histo['caleb']["Low"]["data"]   =  caleb_file.Get("data_lowdm")
+histo['caleb']["Low"]["mc"]     =  caleb_file.Get("mc_lowdm")
+histo['caleb']["Low"]["pred"]   =  caleb_file.Get("pred_lowdm")
 
 #--------------------------------------------------------------------------------------------------------------
 # z-score 
@@ -118,6 +78,9 @@ for region in regions:
             db = histo['caleb'][region][plot].GetBinError(k)
 
             # print("bin = {}  |  a = {} +- {}  |  b = {} +- {}".format(k, a, da, b, db) ) # debbuging
+
+            if (da == 0 and db == 0):
+                da = 1
 
             z = (a-b)/m.sqrt((da**2) + (db**2))
            
@@ -173,4 +136,3 @@ for region in regions:
         c.SaveAs(file_name + ".png")
     
 caleb_file.Close()
-angel_file.Close()

@@ -48,9 +48,7 @@ for variable, trueVariable in zip(variables, trueVariables):
         for region in regions:
             for metcut in metcuts: 
     
-                print('\n')
-    	        print('We are now in: ' + variable + ' ' + particle + ' ' + region + ' ' + metcut) #debbuging
-                print('\n')
+    	        # print('We are now in: ' + variable + ' ' + particle + ' ' + region + ' ' + metcut) #debbuging
     
                 err = "{}".format("" if not metcut else "_")
                 prefix = 'DataMC_' + particle + '_' + region + '_' + metcut + err

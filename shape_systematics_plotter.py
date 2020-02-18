@@ -44,7 +44,7 @@ for region in regions:
     syst['ht'].Add(histo['Validation']['nj'][region], -1)
     syst['ht'].Divide(histo['Validation']['nj'][region]) 
 
-    syst['ht'].GetYaxis().SetRangeUser(-0.5,0.5)
+    syst['ht'].GetYaxis().SetRangeUser(-0.6,0.6)
 
     syst['ht'].Draw(" hist")
     syst['ht'].SetLineColor(ROOT.kBlue)

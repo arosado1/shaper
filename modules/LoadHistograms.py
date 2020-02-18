@@ -24,7 +24,7 @@ def LoadBinHisto(location):
         for variable in variables:
             for region in regions:
 
-                print("\nWe are now in: {} {} {}\n".format(binn, variable, region))
+                #print("\nWe are now in: {} {} {}\n".format(binn, variable, region))
 
                 branch     =   "n{b}Bin{r}DM_jetpt30".format( b = binn, r = region)
                 histogram  = ( "ZNuNu_n{b}Bin_{r}DM_{v}"
@@ -39,7 +39,6 @@ def LoadBinHisto(location):
                 histos[binn][variable][region].SetDirectory(0)                
 
     #fixing LowDm and LowDMHighMET separation
-    print('\nfixing separationn\n')
     for variable in variables:
 
         branch    =       "nValidationBinLowDMHighMET_jetpt30"

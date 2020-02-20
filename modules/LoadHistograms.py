@@ -76,3 +76,47 @@ def LoadBinHisto(location):
     return histos
 
    
+def ForShapeNorm(location):
+    """Load variable distributions in order to calculate shape and normalization factor"""
+
+    root_file = ROOT.TFile.Open(location)
+
+    branches   =  ['nJets_drLeptonCleaned_jetpt30',
+                   'HT_drLeptonCleaned_jetpt30',
+                   'metWithLL']
+    variables  =  ['nj','ht','met']
+    regions    =  ['High', 'Low']
+    particles  =  ['Electron','Muon']
+    metcuts    =  ['', 'Loose']
+    mcdata     =  ['Data','DY','Sint','TTbar','Rare']
+
+    # histos[variable][region][particle][metcut][mcdata]
+    histos = {v: { r: { p: { m: dict.fromkeys(mcdata) for m in metcut } for p in particles} for r in regions } for v in variables }
+
+    for variable in variables:
+        for region in regions:
+            for particle in particles:
+                for metcut in metcuts:
+                    for mcd in mcdata:
+
+                        #print("\nWe are now in: {} {} {} {} {}\n").format(variable, region, particle, metcut, mcd )
+
+                        branch     =   "n{b}Bin{r}DM_jetpt30".format( b = binn, r = region)
+                        histogram  = ( "ZNuNu_n{b}Bin_{r}DM_{v}"
+                                       "jetpt30n{b}Bin{r}DM"
+                                       "_jetpt30n{b}Bin{r}DM"
+                                       "_jetpt30ZJetsToNuNu {b} Bin {r} DMdata" 
+                                     ).format( b = binn, r = region, v = variable + '{}'.format('' if not variable else '_shape_') )
+
+                        histos[binn][variable][region] = root_file.Get(branch + "/" + histogram)
+
+                        if not histos[binn][variable][region]:
+                            print("Error, histogram doesn't exist: branch: {} \nhistogram: {}").format(branch, histogram)
+
+                        histos[binn][variable][region].SetDirectory(0)                
+
+    root_file.Close()
+
+    print("Histogram Loading Success")
+
+    return histos

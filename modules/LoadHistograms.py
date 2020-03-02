@@ -9,6 +9,8 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 #ROOT.PyConfig.fAddDirectory(kFalse)
 
+#####################################################################################################################################
+
 def LoadBinHisto(location):
     """Load Validation and Search bins histograms"""
 
@@ -71,10 +73,11 @@ def LoadBinHisto(location):
 
     root_file.Close()
 
-    print("Histogram Loading Success")
+    print("Loading histograms has been successful")
 
     return histos
 
+#####################################################################################################################################
    
 def ForShapeNorm(location):
     """Load variable distributions in order to calculate shape and normalization factor"""
@@ -103,7 +106,7 @@ def ForShapeNorm(location):
                 for metcut in metcuts:
                     for mcd, mcdn in zip(mcdata, mcdnew):
 
-                        print("We are now in: {} {} {} {} {}").format(variable, region, particle, metcut, mcdn )
+                        # print("We are now in: {} {} {} {} {}").format(variable, region, particle, metcut, mcdn )
 
                         histogram  = ( "DataMC_{p}_{r}_{met}{v}_jetpt30{b}{b}{md}"
                                      ).format( p    =  particle,
@@ -123,6 +126,6 @@ def ForShapeNorm(location):
 
     root_file.Close()
 
-    print("Histogram Loading Success")
+    print("Loading histograms has been successful")
 
     return histos

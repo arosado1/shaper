@@ -12,13 +12,13 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 #####################################################################################################################################
 
 def LoadBinHisto(location):
-    """Load Validation and Search bins histograms"""
+    """Load validation bins histograms with different shape correction factors applied"""
 
     root_file = ROOT.TFile.Open(location)
 
     regions    =  ['High', 'Low']
     variables  =  ['', 'nj','ht','met']
-    binns      =  ['Validation'] # need to add Search
+    binns      =  ['Validation'] # need to add "Search"
 
     # histos[binn][variable][region]
     histos = {b: { v: dict.fromkeys(regions) for v in variables } for b in binns}
@@ -129,3 +129,82 @@ def ForShapeNorm(location):
     print("Loading histograms has been successful")
 
     return histos
+
+#####################################################################################################################################
+   
+def ForStatSyst(location):
+    """Load validation bins with different systematic uncertainties applied"""
+
+    root_file = ROOT.TFile.Open(location)
+
+    regions      =  ['High', 'Low']
+    systematics  =  ['', 'pdf', 'metres', 'jes', 'btag', 'eff_restoptag', 'sb', 'eff_toptag', 'eff_wtag', 'met_trig', 'pileup']
+    directions   =  ['down', 'up']
+    binns        =  ['Validation'] # need to add "Search"
+
+    # histos[binn][syst][region]
+    histos = {b: { s: dict.fromkeys(regions) for s in systematics } for b in binns}
+    for binn in binns:
+        for syst in systematics:
+            for region in regions:
+
+                #print("\nWe are now in: {} {} {}\n".format(binn, syst, region))
+
+                branch     =   "n{b}Bin{r}DM_jetpt30".format( b = binn, r = region)
+                histogram  = ( "ZNuNu_n{b}Bin_{r}DM_{s}"
+                               "jetpt30n{b}Bin{r}DM"
+                               "_jetpt30n{b}Bin{r}DM"
+                               "_jetpt30ZJetsToNuNu {b} Bin {r} DMdata" 
+                             ).format( b = binn, r = region, s = syst + '{}'.format('' if not syst else ('_' + syst + '_')) )
+
+                histos[binn][syst][region] = root_file.Get(branch + "/" + histogram)
+                if not histos[binn][syst][region]:
+                    print("Error, histogram doesn't exist: branch: {} \nhistogram: {}").format(branch, histogram)
+                histos[binn][syst][region].SetDirectory(0)                
+
+    #fixing LowDm and LowDMHighMET separation
+    for syst in systematics:
+
+        branch    =       "nValidationBinLowDMHighMET_jetpt30"
+        histogram = (     "ZNuNu_nValidationBin_LowDM_HighMET_{}"
+			  "jetpt30nValidationBinLowDMHighMET_"
+                          "jetpt30nValidationBinLowDMHighMET_"
+                          "jetpt30ZJetsToNuNu Validation Bin Low DM High METdata"
+                    ).format('' if not variable else "_".join([variable,'shape_']) ) 
+
+        lowHighMet = root_file.Get(branch + "/" + histogram)
+
+        if not lowHighMet:
+            print("Error, histogram doesn't exist: branch: {} \nhistogram: {}").format(branch, histogram)
+        
+        temp = ROOT.TH1F( "nValidationBinLowDM_jetpt30", "nValidationBinLowDM_jetpt30", 19, 0, 19 )
+
+        for k in range(1,20):
+            if k >= 16: 
+                a   =  lowHighMet.GetBinContent(k-15)
+                da  =  lowHighMet.GetBinError(k-15) 
+            else:
+                a   =  histos['Validation'][syst]['Low'].GetBinContent(k)
+                da  =  histos['Validation'][syst]['Low'].GetBinError(k) 
+        
+            temp.SetBinContent( k, a ) 
+            temp.SetBinError( k, da )
+
+        histos['Validation'][syst]['Low'] = temp.Clone()
+        histos['Validation'][syst]['Low'].SetDirectory(0)
+
+    root_file.Close()
+
+    print("Loading histograms has been successful")
+
+    return histos
+
+#####################################################################################################################################
+
+print( "Modules information:\n"
+       "LoadBinHito: {}\n"
+       "ForShapeNorm: {}\n"
+       "ForStatSyst: {}\n"
+     ).format(LoadBinHisto.__doc__, ForShapeNorm.__doc__, ForStatSyst.__doc__)
+
+

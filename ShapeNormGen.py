@@ -17,7 +17,7 @@ year      =  sys.argv[2]
 ################################################################################################################################
 
 def ShapeNormFactors(location):
-    """Load root file and calculate shape and normalization factors.
+    """Load root file and calculate shape and normalization factors with different variables.
        The output is a dictionary: factors[variable][region][particle][fattore]."""
 
     #---------------

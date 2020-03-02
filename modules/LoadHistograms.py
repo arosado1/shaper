@@ -1,6 +1,7 @@
 # Load Histograms 
 
 import ROOT       
+from LowDMHighMET_merger import *
 
 # make sure ROOT.TFile.Open(fileURL) does not seg fault when $ is in sys.argv (e.g. $ passed in as argument)
 ROOT.PyConfig.IgnoreCommandLineOptions = True
@@ -26,7 +27,7 @@ def LoadBinHisto(location):
         for variable in variables:
             for region in regions:
 
-                #print("\nWe are now in: {} {} {}\n".format(binn, variable, region))
+                print("\nWe are now in: {} {} {}\n".format(binn, variable, region))
 
                 branch     =   "n{b}Bin{r}DM_jetpt30".format( b = binn, r = region)
                 histogram  = ( "ZNuNu_n{b}Bin_{r}DM_{v}"
@@ -55,18 +56,7 @@ def LoadBinHisto(location):
         if not lowHighMet:
             print("Error, histogram doesn't exist: branch: {} \nhistogram: {}").format(branch, histogram)
         
-        temp = ROOT.TH1F( "nValidationBinLowDM_jetpt30", "nValidationBinLowDM_jetpt30", 19, 0, 19 )
-
-        for k in range(1,20):
-            if k >= 16: 
-                a   =  lowHighMet.GetBinContent(k-15)
-                da  =  lowHighMet.GetBinError(k-15) 
-            else:
-                a   =  histos['Validation'][variable]['Low'].GetBinContent(k)
-                da  =  histos['Validation'][variable]['Low'].GetBinError(k) 
-        
-            temp.SetBinContent( k, a ) 
-            temp.SetBinError( k, da )
+        temp = LowDMMergerValidationBins(histos['Validation'][variable]['Low'], lowHighMet)
 
         histos['Validation'][variable]['Low'] = temp.Clone()
         histos['Validation'][variable]['Low'].SetDirectory(0)
@@ -201,10 +191,9 @@ def ForStatSyst(location):
 
 #####################################################################################################################################
 
-print( "Modules information:\n"
-       "LoadBinHito: {}\n"
-       "ForShapeNorm: {}\n"
-       "ForStatSyst: {}\n"
-     ).format(LoadBinHisto.__doc__, ForShapeNorm.__doc__, ForStatSyst.__doc__)
-
+#print( "Modules information:\n"
+#       "LoadBinHito: {}\n"
+#       "ForShapeNorm: {}\n"
+#       "ForStatSyst: {}\n"
+#     ).format(LoadBinHisto.__doc__, ForShapeNorm.__doc__, ForStatSyst.__doc__)
 

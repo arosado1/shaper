@@ -21,5 +21,7 @@ def LowDMMergerValidationBins(lowMET, highMET):
         merged.SetBinContent( k, a ) 
         merged.SetBinError( k, da )
     
+    print('LowDM High MET merge successful')
+ 
     return merged
 

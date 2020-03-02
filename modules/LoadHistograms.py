@@ -81,39 +81,45 @@ def ForShapeNorm(location):
 
     root_file = ROOT.TFile.Open(location)
 
-    branches   =  ['nJets_drLeptonCleaned_jetpt30',
-                   'HT_drLeptonCleaned_jetpt30',
-                   'metWithLL']
+    #branches   =  ['nJets_drLeptonCleaned_jetpt30',
+    #               'HT_drLeptonCleaned_jetpt30',
+    #               'metWithLL']
+
+    branches   =  ['nJets_drLeptonCleaned_jetpt30', 'HT_drLeptonCleaned_jetpt30', 'metWithLL']
     variables  =  ['nj','ht','met']
-    regions    =  ['High', 'Low']
+    regions    =  ['HighDM', 'LowDM']
     particles  =  ['Electron','Muon']
     metcuts    =  ['', 'Loose']
-    mcdata     =  ['Data','DY','Sint','TTbar','Rare']
+    mcdata     =  ['Datadata','DYstack','Single tstack','t#bar{t}stack','Rarestack']
+    mcdnew     =  ['Data','DY','Sint','TTbar','Rare']
 
     # histos[variable][region][particle][metcut][mcdata]
-    histos = {v: { r: { p: { m: dict.fromkeys(mcdata) for m in metcut } for p in particles} for r in regions } for v in variables }
+    histos = {v: { r: { p: { m: dict.fromkeys(mcdata) for m in metcuts } for p in particles} for r in regions } for v in variables }
 
-    for variable in variables:
+
+    for variable, branch in zip(variables, branches):
         for region in regions:
             for particle in particles:
                 for metcut in metcuts:
-                    for mcd in mcdata:
+                    for mcd, mcdn in zip(mcdata, mcdnew):
 
-                        #print("\nWe are now in: {} {} {} {} {}\n").format(variable, region, particle, metcut, mcd )
+                        print("We are now in: {} {} {} {} {}").format(variable, region, particle, metcut, mcdn )
 
-                        branch     =   "n{b}Bin{r}DM_jetpt30".format( b = binn, r = region)
-                        histogram  = ( "ZNuNu_n{b}Bin_{r}DM_{v}"
-                                       "jetpt30n{b}Bin{r}DM"
-                                       "_jetpt30n{b}Bin{r}DM"
-                                       "_jetpt30ZJetsToNuNu {b} Bin {r} DMdata" 
-                                     ).format( b = binn, r = region, v = variable + '{}'.format('' if not variable else '_shape_') )
+                        histogram  = ( "DataMC_{p}_{r}_{met}{v}_jetpt30{b}{b}{md}"
+                                     ).format( p    =  particle,
+                                               r    =  region, 
+                                               v    =  variable, 
+                                               b    =  branch, 
+                                               md   =  mcd,
+                                               met  =  "".format( '' if not metcut else (metcut + '_') )
+                                     )
 
-                        histos[binn][variable][region] = root_file.Get(branch + "/" + histogram)
+                        histos[variable][region][particle][metcut][mcdn] = root_file.Get(branch + "/" + histogram)
 
-                        if not histos[binn][variable][region]:
+                        if not histos[variable][region][particle][metcut][mcdn]:
                             print("Error, histogram doesn't exist: branch: {} \nhistogram: {}").format(branch, histogram)
 
-                        histos[binn][variable][region].SetDirectory(0)                
+                        histos[variable][region][particle][metcut][mcdn].SetDirectory(0)                
 
     root_file.Close()
 

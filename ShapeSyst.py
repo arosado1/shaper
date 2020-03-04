@@ -8,109 +8,64 @@ from LoadHistograms import *
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
-location       =  sys.argv[1]
-year           =  sys.argv[2] 
+################################################################################################################################
 
 def ShapeSyst(location):
     """Calculate shape factor systematic uncertainty"""
 
-    #--------------
-    # Definitions 
-    #--------------
-    
-    variables  =  ['nj', 'ht', 'met'] #total is appended later
+    variables  =  ['ht', 'met'] #total is appended later
     regions    =  ['High', 'Low']
+    binns      =  ['Validation']
 
-    # shape[variable][region]
-    shapeSyst = { v: dict.fromkeys(regions) for v in variables }
+    # shape[binn][variable][region]
+    shapeSyst = { b: { v: dict.fromkeys(regions) for v in variables } for b in binns }
 
+    # histos[binn][variable][region]
     temp = LoadBinHisto(location)
 
-    for variable in variables:
-        for region in regions:
-            shapeSyst[variable][region] = temp['Validation'][variable][region]
-
     # calculating systematics
-    for region in regions:
-        for variable in variables:
-            if (variable == 'nj'):
-                continue
-            shapeSyst[variable][region] = temp['Validation'][variable][region].Clone()
-            shapeSyst[variable][region].Add(temp['Validation']['nj'][region], -1)
-            shapeSyst[variable][region].Divide(temp['Validation']['nj'][region])
+    for binn in binns:
+        for region in regions:
+            for variable in variables:
+                shapeSyst[binn][variable][region] = temp[binn][variable][region].Clone()
+                shapeSyst[binn][variable][region].Add(temp[binn]['nj'][region], -1)
+                shapeSyst[binn][variable][region].Divide(temp[binn]['nj'][region])
 
-        shapeSyst['total'][region] = temp['Validation'][''][region].Clone()
-        
-        # some calculation for the total systematic here
+            #shapeSyst['total'][region] = temp['Validation'][''][region].Clone()
+            # some calculation for the total systematic here
 
-
-    # shape[variable][region]
+    # shape[binn][variable][region]
     return shapeSyst
 
 ################################################################################################################################
 
 if __name__ == '__main__':
 
-        syst['ht'].GetYaxis().SetRangeUser(-0.6,0.6)
-    
-        syst['ht'].Draw(" hist")
-        syst['ht'].SetLineColor(ROOT.kBlue)
-        syst['met'].Draw(" same hist")
-        syst['met'].SetLineColor(ROOT.kRed)
-    
-    
-        legend = ROOT.TLegend(0.7, 0.7, 0.9, 0.9)
-        legend.AddEntry(syst['met'], "met ", "l")
-        legend.AddEntry(syst['ht'], "ht ", "l")
-        legend.Draw()
-        c.Update()
-        file_name = "systematic_" + region
-        c.SaveAs(file_name + ".png")
-    
-    #--------------------------------------------------------------------------------------------------------------
-    # Canvas 
-    #--------------------------------------------------------------------------------------------------------------
+    location       =  sys.argv[1]
+    year           =  sys.argv[2] 
+
+    variables  =  ['ht', 'met'] 
+    regions    =  ['High', 'Low']
+    colors     =  [ROOT.kBlue, ROOT.kRed]
+
+    histos = ShapeSyst(location)
+
+    #--------------
+    # Making Plot 
+    #--------------
     
     for region in regions:
-    
-            # draw histograms
-            c = ROOT.TCanvas("c", "c", 800, 800)
-            
-            # legend: TLegend(x1,y1,x2,y2)
-            legend_x1 = 0.7
-            legend_x2 = 0.9 
-            legend_y1 = 0.7 
-            legend_y2 = 0.9 
-            
-            # setupHist(hist, title, x_title, y_title, color, y_min, y_max)
-            # setupHist(h_ratio, "Z to Invisible Prediction / MC", "x_tiTle", "Pred / MC", "aqua", 0.5, 1.5)
-            
-            # histograms
-            # set log y-axis
-            ROOT.gPad.SetLogy(1)
-        
-            # ZInv MC and Prediction
-            histo['Validation'][''][region].Draw("hist error")
-            histo['Validation'][''][region].SetLineColor(ROOT.kBlack)
-    
-            histo['Validation']['nj'][region].Draw("hist same")
-            histo['Validation']['nj'][region].SetLineColor(ROOT.kBlue)
-        
-            histo['Validation']["ht"][region].Draw("same hist")
-            histo['Validation']["ht"][region].SetLineColor(ROOT.kRed)
-            
-            histo['Validation']["met"][region].Draw("same hist")
-            histo['Validation']["met"][region].SetLineColor(ROOT.kGreen)
-    
-            # legend: TLegend(x1,y1,x2,y2)
-            legend = ROOT.TLegend(legend_x1, legend_y1, legend_x2, legend_y2)
-            legend.AddEntry(histo['Validation'][''][region], "data ", "l")
-            legend.AddEntry(histo['Validation']['nj'][region], "nj ", "l")
-            legend.AddEntry(histo['Validation']['ht'][region], "ht ", "l")
-            legend.AddEntry(histo['Validation']['met'][region], "met ", "l")
-            legend.Draw()
-            
-            # save histograms
-            c.Update()
-            file_name = "validations_" + region
-            c.SaveAs(file_name + ".png")
+
+        c = ROOT.TCanvas("c", "c", 800, 800)
+        legend = ROOT.TLegend(0.8, 0.8, 0.9, 0.9)
+
+        for variable, color in zip(variables, colors):
+            histos['Validation'][variable][region].GetYaxis().SetRangeUser(-0.6,0.6)
+            histos['Validation'][variable][region].Draw("hist same")
+            histos['Validation'][variable][region].SetLineColor(color)
+            legend.AddEntry(histos['Validation'][variable][region], variable, "l")
+
+        legend.Draw()
+        c.Update()
+        c.SaveAs('validation_' + region + '_shape_systematics.png')
+

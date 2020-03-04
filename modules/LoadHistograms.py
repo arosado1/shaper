@@ -27,7 +27,7 @@ def LoadBinHisto(location):
         for variable in variables:
             for region in regions:
 
-                print("\nWe are now in: {} {} {}\n".format(binn, variable, region))
+                # print("\nWe are now in: {} {} {}\n".format(binn, variable, region))
 
                 branch     =   "n{b}Bin{r}DM_jetpt30".format( b = binn, r = region)
                 histogram  = ( "ZNuNu_n{b}Bin_{r}DM_{v}"
@@ -65,6 +65,7 @@ def LoadBinHisto(location):
 
     print("Loading histograms has been successful")
 
+    # histos[binn][variable][region]
     return histos
 
 #####################################################################################################################################
@@ -73,10 +74,6 @@ def ForShapeNorm(location):
     """Load variable distributions in order to calculate shape and normalization factor"""
 
     root_file = ROOT.TFile.Open(location)
-
-    #branches   =  ['nJets_drLeptonCleaned_jetpt30',
-    #               'HT_drLeptonCleaned_jetpt30',
-    #               'metWithLL']
 
     branches   =  ['nJets_drLeptonCleaned_jetpt30', 'HT_drLeptonCleaned_jetpt30', 'metWithLL']
     variables  =  ['nj','ht','met']
@@ -118,11 +115,12 @@ def ForShapeNorm(location):
 
     print("Loading histograms has been successful")
 
+    # histos[variable][region][particle][metcut][mcdata]
     return histos
 
 #####################################################################################################################################
    
-def ForStatSyst(location):
+def MCSyst(location):
     """Load validation bins with different systematic uncertainties applied"""
 
     root_file = ROOT.TFile.Open(location)
@@ -139,7 +137,7 @@ def ForStatSyst(location):
             for direction in directions:
                 for region in regions:
     
-                    print("\nWe are now in: {} {} {} {}\n".format(binn, syst, direction, region))
+                    #print("\nWe are now in: {} {} {} {}\n".format(binn, syst, direction, region))
     
                     branch     =   "n{b}Bin{r}DM_jetpt30".format( b = binn, r = region)
                     histogram  = ( "ZNuNu_n{b}Bin_{r}DM_{s}"
@@ -179,13 +177,14 @@ def ForStatSyst(location):
     
         print("Loading histograms has been successful")
 
+    # histos[binn][syst][direction][region]
     return histos
 
 #####################################################################################################################################
-
-#print( "Modules information:\n"
-#       "LoadBinHito: {}\n"
-#       "ForShapeNorm: {}\n"
-#       "ForStatSyst: {}\n"
-#     ).format(LoadBinHisto.__doc__, ForShapeNorm.__doc__, ForStatSyst.__doc__)
+if __name__ == '__main__':
+    print( "Modules information:\n\n"
+           "LoadBinHito: {}\n"
+           "ForShapeNorm: {}\n"
+           "MCSyst: {}\n"
+         ).format(LoadBinHisto.__doc__, ForShapeNorm.__doc__, MCSyst.__doc__)
 

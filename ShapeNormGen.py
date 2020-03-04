@@ -1,5 +1,5 @@
 #ShapeNormGen.py
-# crates root and jpg with shape and normalization factors for different variables
+# calcualte shape and normalization factors for different variables
 
 import ROOT       
 import math as m
@@ -124,43 +124,44 @@ def ShapeNormFactors(location):
     
 ################################################################################################################################
 
-#----------------------------------------------------
-# create root and png
-#----------------------------------------------------
-variables  =  ['nj', 'ht', 'met'] 
-particles  =  ['Electron', 'Muon', 'Combined']
-regions    =  ['HighDM', 'LowDM']
+if __name__ == '__main__':
 
-factors  =  ShapeNormFactors(location)
-
-f = ROOT.TFile('factors_' + year + '.root', 'recreate')
-
-for variable in variables: 
-    for particle in particles:
-        for region in regions:
-            fattore = 'shape'
-
-            print("we are in: {} {} {} {}".format(variable, particle, region, fattore))
-
-            # canvas
-            canvas = ROOT.TCanvas('c', 'c', 800, 800)
+    #----------------------------------------------------
+    # create root and png
+    #----------------------------------------------------
+    variables  =  ['nj', 'ht', 'met'] 
+    particles  =  ['Electron', 'Muon', 'Combined']
+    regions    =  ['HighDM', 'LowDM']
     
-            # legend
-            legend = ROOT.TLegend(0.5, 0.7, 0.9, 0.9)
-            legend.AddEntry(factors[variable][region][particle][fattore], fattore, 'l' )
-            legend.Draw()
-
-            factors[variable][region][particle][fattore].Draw('error')
-
-            canvas.Update()
-            factors[variable][region][particle][fattore].Write()
-
-            # png
-            #file_name = factor + '_' + particle + '_' + region + '_' + year + '_' + variable + '.png'
-            file_name = '{}_{}_{}_{}'.format(variable, particle, fattore, region) + '.png'
-            canvas.SaveAs(file_name)
-
-            print(file_name)
+    factors  =  ShapeNormFactors(location)
     
-
-f.Close()
+    f = ROOT.TFile('factors_' + year + '.root', 'recreate')
+    
+    for variable in variables: 
+        for particle in particles:
+            for region in regions:
+                fattore = 'shape'
+    
+                print("we are in: {} {} {} {}".format(variable, particle, region, fattore))
+    
+                # canvas
+                canvas = ROOT.TCanvas('c', 'c', 800, 800)
+        
+                # legend
+                legend = ROOT.TLegend(0.5, 0.7, 0.9, 0.9)
+                legend.AddEntry(factors[variable][region][particle][fattore], fattore, 'l' )
+                legend.Draw()
+    
+                factors[variable][region][particle][fattore].Draw('error')
+    
+                canvas.Update()
+                factors[variable][region][particle][fattore].Write()
+    
+                # png
+                #file_name = factor + '_' + particle + '_' + region + '_' + year + '_' + variable + '.png'
+                file_name = '{}_{}_{}_{}'.format(variable, particle, fattore, region) + '.png'
+                canvas.SaveAs(file_name)
+    
+                print(file_name)
+    
+    f.Close()

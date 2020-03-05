@@ -1,7 +1,8 @@
-# ShapeSyst.py
-# Calculate shape factor systematics uncertainty
+# TotalSyst.py (under construction)
+# Calculate the total systematics uncertainty
 
 import ROOT
+import math as m
 import sys 
 sys.dont_write_bytecode = True
 sys.path.append('./modules')
@@ -12,20 +13,41 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 ################################################################################################################################
 
-def ShapeSyst(location):
-    """Calculate shape factor systematic uncertainty"""
+def TotalSyst(location):
+    """Calculate the total systematics uncertainty"""
 
-    variables  =  ['ht', 'met', 'total'] #total is appended later
-    regions    =  ['High', 'Low']
-    binns      =  ['Validation']
+    regions      =  ['High', 'Low']
+    systematics  =  ['', 'pdf', 'metres', 'jes', 'btag', 'eff_restoptag', 'eff_sb', 'eff_toptag', 'eff_wtag', 'met_trig', 'pileup']
+    directions   =  ['down', 'up']
+    binns        =  ['Validation']
 
-    # shape[binn][variable][region]
-    shapeSyst = { b: { v: dict.fromkeys(regions) for v in variables } for b in binns }
+    # shape[binn][direction][region]
+    totalSyst = { b: { d: dict.fromkeys(regions) for d in directions } for b in binns }
 
-    # histos[binn][variable][region]
-    temp = LoadBinHisto(location)
+    # histos[binn][syst][direction][region]
+    histos = MCsyst(location)
 
-    # calculating systematics
+    for binn in binns:
+        for region in regions:
+            for direction in directions:
+
+                nbins = histos[binn][''][direction][region].GetNbinsX() 
+
+                for k in range(0, nbins):
+                    
+                    s  =  'ShapeSyst'.GetBinContent(k)
+                    
+                    for syst in systematics:
+                   
+                        a  =  histos[binn][syst][direction][region].GetBinContent(k)
+                        s  =  m.sqrt( ( s**2 ) + ( a**2 ) )
+
+                    totalSyst[binn][direction][region].SetBinContent(k, s)
+
+
+
+################################################################################################################################
+
     for binn in binns:
         for region in regions:
  

@@ -13,7 +13,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 def ShapeSyst(location):
     """Calculate shape factor systematic uncertainty"""
 
-    variables  =  ['ht', 'met'] #total is appended later
+    variables  =  ['ht', 'met', 'total'] #total is appended later
     regions    =  ['High', 'Low']
     binns      =  ['Validation']
 
@@ -27,12 +27,15 @@ def ShapeSyst(location):
     for binn in binns:
         for region in regions:
             for variable in variables:
+                if (variable == 'total'):
+                    continue
+
                 shapeSyst[binn][variable][region] = temp[binn][variable][region].Clone()
                 shapeSyst[binn][variable][region].Add(temp[binn]['nj'][region], -1)
                 shapeSyst[binn][variable][region].Divide(temp[binn]['nj'][region])
 
-            #shapeSyst['total'][region] = temp['Validation'][''][region].Clone()
-            # some calculation for the total systematic here
+            # some calculation for the total systematic here (for now is nominal)
+            shapeSyst[binn]['total'][region] = temp['Validation'][''][region].Clone()
 
     # shape[binn][variable][region]
     return shapeSyst

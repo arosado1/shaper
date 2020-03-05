@@ -64,6 +64,7 @@ if __name__ == '__main__':
     regions    =  ['High', 'Low']
     colors     =  [ROOT.kBlue, ROOT.kRed, ROOT.kBlack]
 
+    # shape[binn][variable][region]
     histos = ShapeSyst(location)
 
     #--------------

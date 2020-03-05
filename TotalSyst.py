@@ -17,7 +17,7 @@ def TotalSyst(location):
     """Calculate the total systematics uncertainty"""
 
     regions      =  ['High', 'Low']
-    systematics  =  ['', 'pdf', 'metres', 'jes', 'btag', 'eff_restoptag', 'eff_sb', 'eff_toptag', 'eff_wtag', 'met_trig', 'pileup']
+    systematics  =  ['pdf', 'metres', 'jes', 'btag', 'eff_restoptag', 'eff_sb', 'eff_toptag', 'eff_wtag', 'met_trig', 'pileup']
     directions   =  ['down', 'up']
     binns        =  ['Validation']
 
@@ -25,85 +25,74 @@ def TotalSyst(location):
     totalSyst = { b: { d: dict.fromkeys(regions) for d in directions } for b in binns }
 
     # histos[binn][syst][direction][region]
-    histos = MCsyst(location)
+    histos = MCSyst(location)
 
     for binn in binns:
         for region in regions:
             for direction in directions:
 
                 nbins = histos[binn][''][direction][region].GetNbinsX() 
+                totalSyst[binn][direction][region]  =  histos[binn][''][direction][region].Clone()
 
                 for k in range(0, nbins):
                     
-                    s  =  'ShapeSyst'.GetBinContent(k)
-                    
-                    for syst in systematics:
-                   
-                        a  =  histos[binn][syst][direction][region].GetBinContent(k)
-                        s  =  m.sqrt( ( s**2 ) + ( a**2 ) )
+                    s  =  0 # we can include shape systematic here
+                    n  =  histos[binn][ '' ][direction][region].GetBinContent(k)
+                    if n != 0:
+                        for syst in systematics:
+                            a  =  histos[binn][syst][direction][region].GetBinContent(k)
 
+                            a = ( abs(a) - abs(n) )/n
+                            s  +=  a**2 
+
+                            print('n = {:10.4f},  a = {:10.4f},  s = {:10.4f}'.format(n, a, s) )
+                    s  =  m.sqrt(s)
+                    if direction == 'up':
+                        s  =  1 + s
+                    else:
+                        s  =  1 - s
+
+                    print('\n--new line--')
                     totalSyst[binn][direction][region].SetBinContent(k, s)
-
-
-
-################################################################################################################################
-
-    for binn in binns:
-        for region in regions:
- 
-            #for total syst
-            nbins = temp[binn][''][region].GetNbinsX()
-            shapeSyst[binn]['total'][region] = temp['Validation'][''][region].Clone()
-            for k in range(0, nbins):
-                shapeSyst[binn]['total'][region].SetBinContent(k, 0)
-
-            for variable in variables:
-                if (variable == 'total'):
-                    continue
-
-                shapeSyst[binn][variable][region] = temp[binn][variable][region].Clone()
-                shapeSyst[binn][variable][region].Add(temp[binn]['nj'][region], -1)
-                shapeSyst[binn][variable][region].Divide(temp[binn]['nj'][region])
-
-                # total here is the envelople
-                for k in range(0, nbins):
-                    a = abs( shapeSyst[binn][variable][region].GetBinContent(k) )
-                    b = abs( shapeSyst[binn]['total'][region].GetBinContent(k) )
-                    if a > b:
-                        shapeSyst[binn]['total'][region].SetBinContent(k, a)
-
-    # shape[binn][variable][region]
-    return shapeSyst
+                    
+    # totalSyst[binn][direction][region]
+    return totalSyst
 
 ################################################################################################################################
 
 if __name__ == '__main__':
 
     location       =  sys.argv[1]
-    year           =  sys.argv[2] 
+    #year           =  sys.argv[2] 
 
-    variables  =  ['ht', 'met'] 
-    regions    =  ['High', 'Low']
-    colors     =  [ROOT.kBlue, ROOT.kRed, ROOT.kBlack]
+    regions      =  ['High', 'Low']
+    directions   =  ['down', 'up']
+    binns        =  ['Validation']
 
-    histos = ShapeSyst(location)
+    # histos[binn][direction][region]
+    histos = TotalSyst(location)
 
     #--------------
     # Making Plot 
     #--------------
-    
-    for region in regions:
+    for binn in binns: 
+        for region in regions:
 
-        c = ROOT.TCanvas("c", "c", 800, 800)
-        legend = ROOT.TLegend(0.75, 0.75, 0.9, 0.9)
+            c = ROOT.TCanvas("c", "c", 800, 800)
+            legend = ROOT.TLegend(0.75, 0.75, 0.9, 0.9)
 
-        for variable, color in zip(variables, colors):
-            histos['Validation'][variable][region].GetYaxis().SetRangeUser(-0.6,0.6)
-            histos['Validation'][variable][region].Draw("hist same")
-            histos['Validation'][variable][region].SetLineColor(color)
-            legend.AddEntry(histos['Validation'][variable][region], variable, "l")
+            histos[binn]['up'][region].GetYaxis().SetRangeUser(0.3, 1.7)
 
-        legend.Draw()
-        c.Update()
-        c.SaveAs('outputs/validation_' + region + '_shape_systematics.png')
+            histos[binn]['up'][region].Draw(" hist ")
+            histos[binn]['down'][region].Draw(" hist same ")
+
+            histos[binn]['up'][region].SetLineColor(ROOT.kRed)
+            histos[binn]['down'][region].SetLineColor(ROOT.kBlue)
+
+            legend.AddEntry(histos[binn]['up'][region], 'up', "l")
+            legend.AddEntry(histos[binn]['down'][region], 'down', "l")
+
+            legend.Draw()
+            c.Update()
+            c.SaveAs( 'outputs/{}_{}_Total_syst.png'.format(binn, region ) )
 

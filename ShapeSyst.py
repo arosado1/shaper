@@ -1,7 +1,9 @@
-# Calculate shape factor systematics (under construction)(this will replace shape_systematic_plotter.py) 
+# ShapeSyst.py
+# Calculate shape factor systematics uncertainty
 
 import ROOT
 import sys 
+sys.dont_write_bytecode = True
 sys.path.append('./modules')
 from LoadHistograms import *
 
@@ -26,6 +28,10 @@ def ShapeSyst(location):
     # calculating systematics
     for binn in binns:
         for region in regions:
+ 
+            nbins = temp[binn][''][region].GetNbinsX()
+            shapeSyst[binn]['total'][region] = temp['Validation'][''][region].Clone()
+
             for variable in variables:
                 if (variable == 'total'):
                     continue
@@ -34,8 +40,8 @@ def ShapeSyst(location):
                 shapeSyst[binn][variable][region].Add(temp[binn]['nj'][region], -1)
                 shapeSyst[binn][variable][region].Divide(temp[binn]['nj'][region])
 
-            # some calculation for the total systematic here (for now is nominal)
-            shapeSyst[binn]['total'][region] = temp['Validation'][''][region].Clone()
+                for k in range(0, nbins):
+                    shapeSyst[binn]['total'][region].SetBinContent(k, 0)
 
     # shape[binn][variable][region]
     return shapeSyst
@@ -60,7 +66,7 @@ if __name__ == '__main__':
     for region in regions:
 
         c = ROOT.TCanvas("c", "c", 800, 800)
-        legend = ROOT.TLegend(0.8, 0.8, 0.9, 0.9)
+        legend = ROOT.TLegend(0.75, 0.75, 0.9, 0.9)
 
         for variable, color in zip(variables, colors):
             histos['Validation'][variable][region].GetYaxis().SetRangeUser(-0.6,0.6)
@@ -70,5 +76,5 @@ if __name__ == '__main__':
 
         legend.Draw()
         c.Update()
-        c.SaveAs('validation_' + region + '_shape_systematics.png')
+        c.SaveAs('outputs/validation_' + region + '_shape_systematics.png')
 

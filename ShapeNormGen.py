@@ -1,9 +1,10 @@
-#ShapeNormGen.py
-# calcualte shape and normalization factors for different variables
+# ShapeNormGen.py
+# Calcualte shape and normalization factors for different variables
 
 import ROOT       
 import math as m
 import sys
+sys.dont_write_bytecode = True
 sys.path.append('./modules')
 from LoadHistograms import *
 
@@ -17,7 +18,7 @@ year      =  sys.argv[2]
 ################################################################################################################################
 
 def ShapeNormFactors(location):
-    """Load root file and calculate shape and normalization factors with different variables.
+    """Calculate shape and normalization factors with different variables.
        The output is a dictionary: factors[variable][region][particle][fattore]."""
 
     #---------------
@@ -159,7 +160,7 @@ if __name__ == '__main__':
     
                 # png
                 #file_name = factor + '_' + particle + '_' + region + '_' + year + '_' + variable + '.png'
-                file_name = '{}_{}_{}_{}'.format(variable, particle, fattore, region) + '.png'
+                file_name = 'outputs/{}_{}_{}_{}'.format(variable, particle, fattore, region) + '.png'
                 canvas.SaveAs(file_name)
     
                 print(file_name)

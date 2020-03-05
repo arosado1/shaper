@@ -1,11 +1,11 @@
-# prediction (under construction)
-# the deliverables: histogram with yield and error bar
-#                   table with yield, syst unc, and stat unc 
+# Prediction.py 
+# Make Z to invisible prediction table and histograms 
 
 
 import ROOT
 import math as m
 import sys 
+sys.dont_write_bytecode = True
 sys.path.append('./modules')
 from LoadHistograms import *
 from ShapeSyst import *
@@ -16,7 +16,7 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 ################################################################################################################################
 
 def Prediction(location):
-    """ Make Z to invisible prediction table and histogram"""
+    """Make Z to invisible prediction table and histogram"""
 
     regions  =  ['Low', 'High']
     plots    =  ['mc', 'pred']
@@ -31,20 +31,20 @@ def Prediction(location):
     # pred[binn][region]
     pred = {b: dict.fromkeys(regions) for b in binns}
 
-    with open('PredictionTable.txt', 'w') as sheet:
+    with open('outputs/PredictionTable.txt', 'w') as sheet:
         for binn in binns:
             for region in regions:
 
                 sheet.write( '\n{} {}DM table\n\n'.format(binn, region) )
                 sheet.write('{:<10s}{:<9s}{:<12s}{:<11s}{:<11s}\n'.format('bin', 'yield', 'stat_unc', 'syst_unc', 'total_unc') ) 
 
-                end = histos[binn]['nj'][region].GetNbinsX()
+                nbins = histos[binn]['nj'][region].GetNbinsX()
 
                 pred[binn][region] = histos[binn]['nj'][region].Clone()
 
-                print('bin counting, end = {}'.format(end)) # for debugging purposes
+                print('bin counting, nbins = {}'.format(nbins)) # for debugging purposes
 
-                for k in range(0, end): 
+                for k in range(0, nbins): 
 
                     val   =  histos[binn]['nj'][region].GetBinContent(k)
                     stat  =  histos[binn]['nj'][region].GetBinError(k)

@@ -45,14 +45,14 @@ def TotalSyst(location):
                             a = ( abs(a) - abs(n) )/n
                             s  +=  a**2 
 
-                            print('n = {:10.4f},  a = {:10.4f},  s = {:10.4f}'.format(n, a, s) )
+                            #print('n = {:10.4f},  a = {:10.4f},  s = {:10.4f}'.format(n, a, s) )
                     s  =  m.sqrt(s)
                     if direction == 'up':
                         s  =  1 + s
                     else:
                         s  =  1 - s
 
-                    print('\n--new line--')
+                    #print('\n--new line--')
                     totalSyst[binn][direction][region].SetBinContent(k, s)
                     
     # totalSyst[binn][direction][region]
@@ -63,7 +63,7 @@ def TotalSyst(location):
 if __name__ == '__main__':
 
     location       =  sys.argv[1]
-    #year           =  sys.argv[2] 
+    year           =  sys.argv[2] 
 
     regions      =  ['High', 'Low']
     directions   =  ['down', 'up']
@@ -94,5 +94,5 @@ if __name__ == '__main__':
 
             legend.Draw()
             c.Update()
-            c.SaveAs( 'outputs/{}_{}_Total_syst.png'.format(binn, region ) )
+            c.SaveAs( 'outputs/{}_{}_{}_Total_syst.png'.format(binn, region, year ) )
 

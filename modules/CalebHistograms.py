@@ -45,7 +45,6 @@ def CalebValHistos(location_1, location_2):
 #####################################################################################################################################
 
 if __name__ == '__main__':
-    """Plot Caleb's prediction and systematics"""
 
     regions  =  ['Low', 'High']
     data     =  ['yield', 'syst']

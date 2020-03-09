@@ -123,10 +123,13 @@ if __name__ == '__main__':
         c.cd(2)
         histos['angel'][region]['zscore'].SetTitle('z-score')
         histos['angel'][region]['zscore'].GetYaxis().SetTitle('#sigma deviations')
+        histos['angel'][region]['zscore'].SetLineColor(ROOT.kBlue)
         histos['angel'][region]['zscore'].Draw("hist")
     
         # save histograms
         c.Update()
         file_name = "outputs/z_score_validation_" + region + '.png'
         c.SaveAs(file_name)
+
+        c.Close()
 

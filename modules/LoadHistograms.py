@@ -59,6 +59,8 @@ def LoadBinHisto(location):
         temp = LowDMMergerValidationBins(histos['Validation'][variable]['Low'], lowHighMet)
 
         histos['Validation'][variable]['Low'] = temp.Clone()
+        histos['Validation'][variable]['Low'].GetYaxis().SetTitle('Events')
+        histos['Validation'][variable]['Low'].GetXaxis().SetTitle('Validations Bin Low DM')
         histos['Validation'][variable]['Low'].SetDirectory(0)
 
     root_file.Close()

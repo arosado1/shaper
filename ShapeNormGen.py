@@ -143,7 +143,7 @@ if __name__ == '__main__':
             for region in regions:
                 fattore = 'shape'
     
-                print("we are in: {} {} {} {}".format(variable, particle, region, fattore))
+                #print("we are in: {} {} {} {}".format(variable, particle, region, fattore))
     
                 # canvas
                 canvas = ROOT.TCanvas('c', 'c', 800, 800)

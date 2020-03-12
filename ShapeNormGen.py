@@ -33,7 +33,7 @@ def ShapeNormFactors(location):
     variables  =  ['nj', 'ht', 'met'] # add more latter
     fattori    =  ['shape', 'norm']
     particles  =  ['Electron', 'Muon', 'Combined']
-    regions    =  ['HighDM', 'LowDM']
+    regions    =  ['High', 'Low']
 
     # factors[variable][region][particle][fattore]
     factors = {v: {r: {p: dict.fromkeys(fattori) for p in particles} for r in regions} for v in variables}
@@ -93,8 +93,9 @@ def ShapeNormFactors(location):
             #----------------------------------------------------
             # merging electron and muons (weighted average) 
             #----------------------------------------------------
-    
-            name   =  '{}_shape_Combined_{}_{}'.format(variable, region, year)
+
+            # combined shape factors
+            name  =  '{}_shape_Combined_{}_{}'.format(variable, region, year)
             factors[variable][region]['Combined']['shape']  =  ROOT.TH1F( name, name, nbins, start, end)
                 
             for k in range(start, end):
@@ -119,8 +120,12 @@ def ShapeNormFactors(location):
                 factors[variable][region]['Combined']['shape'].SetBinContent(k, c)
                 factors[variable][region]['Combined']['shape'].SetBinError(k, dc)
 
+            # combined norm factors
+            factors[variable][region]['Combined']['norm'] = factors[variable][region]['Electron']['norm']
+
     print("Calculation of shape and norm factors has been successful")
 
+    # factors[variable][region][particle][fattore]
     return factors
     
 ################################################################################################################################
@@ -132,7 +137,7 @@ if __name__ == '__main__':
     #----------------------------------------------------
     variables  =  ['nj', 'ht', 'met'] 
     particles  =  ['Electron', 'Muon', 'Combined']
-    regions    =  ['HighDM', 'LowDM']
+    regions    =  ['High', 'Low']
     
     factors  =  ShapeNormFactors(location)
     

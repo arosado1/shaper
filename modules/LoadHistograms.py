@@ -79,7 +79,7 @@ def ForShapeNorm(location):
 
     branches   =  ['nJets_drLeptonCleaned_jetpt30', 'HT_drLeptonCleaned_jetpt30', 'metWithLL']
     variables  =  ['nj','ht','met']
-    regions    =  ['HighDM', 'LowDM']
+    regions    =  ['High', 'Low']
     particles  =  ['Electron','Muon']
     metcuts    =  ['', 'Loose']
     mcdata     =  ['Datadata','DYstack','Single tstack','t#bar{t}stack','Rarestack']
@@ -97,7 +97,7 @@ def ForShapeNorm(location):
 
                         # print("We are now in: {} {} {} {} {}").format(variable, region, particle, metcut, mcdn )
 
-                        histogram  = ( "DataMC_{p}_{r}_{met}{v}_jetpt30{b}{b}{md}"
+                        histogram  = ( "DataMC_{p}_{r}DM_{met}{v}_jetpt30{b}{b}{md}"
                                      ).format( p    =  particle,
                                                r    =  region, 
                                                v    =  variable, 

@@ -9,72 +9,71 @@ sys.path.append('./modules')
 from LoadHistograms import *
 from TotalSyst import *
 from CalebHistograms import *
+from Prediction import *
 
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 ################################################################################################################################
 
-def Compare(location_1, location_2, location_3):
+def Compare(location_a, location_c):
     """ Returns predictions table and z_score plot """
 
-    binn       =  'Validation'
-    regions    =  ['High', 'Low']
-    direction  =  ['up','down']
+    binns       =  ['Validation']
+    regions     =  ['High', 'Low']
+    directions  =  ['up','down']
 
     # zscore[binn][region]
     zscore  =  { b: dict.fromkeys(regions) for b in binns }
 
     # histos[binn][region] (loading angel yield and stat)
-    yield_a = Yield(location_1)
+    yield_a  =  Yield(location_a)
              
-    # totalSyst[binn][region][direction] (loading angel syst)
-    syst_a = TotalSyst(location_1)
+    # totalSyst[binn][direction][region] (loading angel syst)
+    syst_a  =  TotalSyst(location_a)
 
-    # histos[binn][region]loading (caleb yield and stat)
-    yield_c = CalebYield(location_2) 
-
-    # histos[binn][region][direction] (loading caleb syst)
-    syst_c = CalebSyst(location_3) 
+    # histos[binn][region], syst[binn][region][direction] 
+    yield_c, syst_c  =  CalebHists(location_c) 
 
     for binn in binns:
         for region in regions:
 
-            nbins  =  temp1[binn][region].GetNbinsX()
-            print('nbins = {}\nnbins = {}\n'.format(nbins, yield_c[binn][region].GetNbinsX() ) )
+            nbins  =  yield_a[binn][region].GetNbinsX()
 
             zscore[binn][region]  =  yield_a[binn][region].Clone()
 
             for k in range(0, nbins):
 
-            a   =  yield_a[binn][region].GetBinContent(k) 
-            c   =  yield_c[binn][regin].GetBinContent(k)
+                a   =  yield_a[binn][region].GetBinContent(k) 
+                c   =  yield_c[binn][region].GetBinContent(k)
 
-            ae  =  yield_a[binn][region].GetBinError(k)
-            ce  =  yield_c[binn][region].GetBinError(k)
+                ae  =  yield_a[binn][region].GetBinError(k)
+                ce  =  yield_c[binn][region].GetBinError(k)
 
-            d  =  a - c
+                d  =  a - c
 
-            if ( d > 0 ):
+                if ( d > 0 ):
 
-                asy  =  syst_a[binn][region]['down'].GetBinContent(k) -1 
-                csy  =  syst_c[binn][region]['up'].GetBinContent(k) -1
+                    asy  =  syst_a[binn]['down'][region].GetBinContent(k) -1 
+                    csy  =  syst_c[binn][region]['up'].GetBinContent(k) -1
 
-            elif ( d < 0 ):
+                elif ( d < 0 ):
 
-                asy  =  syst_a[binn][region]['up'].GetBinContent(k) -1 
-                csy  =  syst_c[binn][region]['down'].GetBinContent(k) -1
+                    asy  =  syst_a[binn]['up'][region].GetBinContent(k) -1 
+                    csy  =  syst_c[binn][region]['down'].GetBinContent(k) -1
 
-            elif ( d == 0 ):
+                elif ( d == 0 ):
 
-                print('\nd == 0 has occured\n')
-            
-            d /=  m.sqrt( ae**2 + ce**2 + asy**2  + csy**2 )
+                    print('\nd == 0 has occured\n')
+                
+                d /=  m.sqrt( ae**2 + ce**2 + asy**2  + csy**2 )
 
             #print('bin = {}\nay = {}    cy = {}\nae = {}    ce = {}\nasy = {}    csy = {}\nd = {}\n').format(k, ay, cy, ae, ce, asy, csy, d)
 
-            histos[binn][region].SetBinContent(k, d)
-            histos[binn][region].SetBinContent(k, d)
+            zscore[binn][region].SetBinContent(k, d)
+            zscore[binn][region].SetBinContent(k, d)
+
+    print('zscore calculation completed')
 
     # zscore[binn][region]
     return zscore
@@ -88,13 +87,11 @@ if __name__ == '__main__':
     regions    =  ['High', 'Low']
     direction  =  ['up','down']
 
-    location_1  =  sys.argv[1]
-    location_2  =  sys.argv[2]
-    location_3  =  sys.argv[3]
-    location_4  =  sys.argv[3]
+    location_a  =  sys.argv[1]
+    location_c  =  sys.argv[2]
 
     # histos[binn][region]
-    histos  =  Compare(location_1, location_2, location_3)
+    zscore  =  Compare(location_a, location_c)
 
     for region in regions:
 
@@ -106,8 +103,8 @@ if __name__ == '__main__':
         c.cd(1)
         ROOT.gPad.SetLogy(1)
 
-        angel  =  Yield(location_1)
-        caleb  =  CalebYield(location_2)
+        angel  =  Yield(location_a)
+        caleb, nope  =  CalebHists(location_c)
        
         # ZInv MC and Prediction
         angel[binn][region].SetTitle( '{}#DeltaM Validation Bins Z#rightarrow#nu#nu comparison'.format(region) )

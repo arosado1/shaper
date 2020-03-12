@@ -15,61 +15,82 @@ ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
 #####################################################################################################################################
 
-def CalebValHistos(location):
+def CalebYield(validation_l, search_l):
     """Load Caleb's validation bins histograms"""
 
-    root_yield = ROOT.TFile.Open(location_1)
-
-    Regions  =  ['lowdm', 'highdm']
-    regions  =  ['Low', 'High']
+    binns      =  ['Validation', 'Search']
+    locations  =  [validation_l, search_l]
+    Regions    =  ['lowdm', 'highdm']
+    regions    =  ['Low', 'High']
     
-    # histos[region]
-    histos  =  dict.fromkeys(regions)
+    # histos[binn][region]
+    histos  = { b: dict.fromkeys(regions) for b in binns }
 
-    for Region, region in zip(Regions, regions):
+    for location, binn in zip(locations,binns):
+        for Region, region in zip(Regions, regions):
 
-        name  =  'pred_' + Region
-
-        histos[region]  =  root_yield.Get( name )
-
-        if not histos[region]:
-            print( "Error, histogram doesn't exist: " + name )
-        histos[region].SetDirectory(0)                
+            root_file = ROOT.TFile.Open(location)
+    
+            name  =  'pred_' + Region
+            histos[binn][region]  =  root_file.Get( name )
+    
+            if not histos[binn][region]:
+                print( "Error, histogram doesn't exist: " + name )
+            histos[binn][region].SetDirectory(0)                
 
     print("Loading histograms has been successful")
 
-    # histos[region]
+    # histos[binn][region]
     return histos
 
 #####################################################################################################################################
 
-def CalebValSyst(location):
+def CalebSyst(validation_l, search_l):
     """Load Caleb's validation bins systematics"""
 
-    root_yield = ROOT.TFile.Open(location)
-
+    binns       =  ['Validation', 'Search']
+    locations   =  [validation_l, search_l]
     Regions     =  ['lowdm', 'highdm']
     regions     =  ['Low', 'High']
     directions  =  ['up', 'down']
     
-    # histos[region][direction]
-    histos  =  dict.fromkeys(regions)
+    # histos[binn][region][direction]
+    histos  = { b: { r: dict.fromkeys(directions) for r in regions } for b in binns}
 
-    for Region, region in zip(Regions, regions):
-        for direction in directions:
+    for location, binn in zip(locations,binns):
+        for Region, region in zip(Regions, regions):
+            for direction in directions:
 
-            name  =  'syst_{}_{}'.format(direction, Region)
-    
-            histos[region][direction]  =  root_syst.Get( name ) 
-    
-                if not histos[region][direction]:
+                root_file  =  ROOT.TFile.Open(location)
+
+                name  =  'syst_{}_{}'.format(direction, Region)
+                histos[binn][region][direction]  =  root_file.Get( name ) 
+        
+                if not histos[binn][region][direction]:
                     print("Error, histogram doesn't exist: " + name)
-                histos[region][direction].SetDirectory(0)                
+                histos[binn][region][direction].SetDirectory(0)                
     
     print("Loading histograms has been successful")
 
-    # histos[region][direction]
+    # histos[binn][region][direction]
     return histos
+
+#####################################################################################################################################
+
+def CalebHists(location):
+    """ An economic version to deal with"""
+
+    val_yield  =  location + "/validationBinsZinv_2016.root"
+    sea_yield  =  location + "/searchBinsZinv_2016.root"
+
+    val_syst  =  location + "/validationBinsZinv_syst_Run2.root"
+    sea_syst  =  location + "/searchBinsZinv_syst_Run2.root"
+
+    y  =  CalebYield( val_yield, sea_yield )
+    s  =  CalebSyst( val_syst, sea_syst )
+
+    # CalebYield(), CalebSyst()
+    return y, s
 
 #####################################################################################################################################
 
@@ -106,6 +127,4 @@ def CalebValSyst(location):
 #            canvas.SaveAs(file_name)
 #    
 #            print(file_name)
-
-
 

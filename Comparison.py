@@ -20,7 +20,7 @@ def Compare(location_a, location_c):
     """ Returns predictions table and z_score plot """
 
     binns       =  ['Validation']
-    regions     =  ['High', 'Low']
+    regions     =  ['Low', 'High']
     directions  =  ['up','down']
 
     # zscore[binn][region]
@@ -52,7 +52,7 @@ def Compare(location_a, location_c):
 
                 d  =  a - c
 
-                if ( d > 0 ):
+                if ( d >= 0 ):
 
                     asy  =  syst_a[binn]['down'][region].GetBinContent(k) -1 
                     csy  =  syst_c[binn][region]['up'].GetBinContent(k) -1
@@ -61,17 +61,13 @@ def Compare(location_a, location_c):
 
                     asy  =  syst_a[binn]['up'][region].GetBinContent(k) -1 
                     csy  =  syst_c[binn][region]['down'].GetBinContent(k) -1
-
-                elif ( d == 0 ):
-
-                    print('\nd == 0 has occured\n')
                 
                 d /=  m.sqrt( ae**2 + ce**2 + asy**2  + csy**2 )
 
-            #print('bin = {}\nay = {}    cy = {}\nae = {}    ce = {}\nasy = {}    csy = {}\nd = {}\n').format(k, ay, cy, ae, ce, asy, csy, d)
+                #print('bin = {}\nay = {}    cy = {}\nae = {}    ce = {}\nasy = {}    csy = {}\nd = {}\n').format(k, a, c, ae, ce, asy, csy, d)
+                print('d = {}'.format(d) )
 
-            zscore[binn][region].SetBinContent(k, d)
-            zscore[binn][region].SetBinContent(k, d)
+                zscore[binn][region].SetBinContent(k, d)
 
     print('zscore calculation completed')
 
@@ -83,7 +79,6 @@ def Compare(location_a, location_c):
 if __name__ == '__main__':
 
     binn       =  'Validation'
-    methods    =  ['angel', 'caleb']
     regions    =  ['High', 'Low']
     direction  =  ['up','down']
 

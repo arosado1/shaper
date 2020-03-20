@@ -23,7 +23,7 @@ def Prediction(location):
     binns    =  ['Validation']
 
     # histo[binn][variable][region]
-    histos     =  LoadBinHisto(location)
+    histos  =  LoadBinHisto(location)
 
     # shape[binn][variable][region]
     shapeSyst  =  ShapeSyst(location)
@@ -56,6 +56,7 @@ def Prediction(location):
                     sheet.write(line) 
                 sheet.write('\n'+80*'#'+'\n')
 
+    # pred[binn][region]
     return pred             
 
 ################################################################################################################################
@@ -67,7 +68,7 @@ def Yield(location):
     regions   =  ['Low', 'High']
 
     # histos[binn][variable][region]
-    histos   =  LoadBinHisto(location)
+    histos  =  LoadBinHisto(location)
 
     # factors[variable][region][particle][fattore]
     factors  =  ShapeNormFactors(location)
@@ -89,7 +90,7 @@ def Yield(location):
 if __name__ == '__main__':
 
     location  =  sys.argv[1]
-    #year      =  sys.argv[2] 
+    year      =  sys.argv[2] 
 
     regions  =  ['Low', 'High']
     plots    =  ['mc', 'pred']
@@ -115,7 +116,7 @@ if __name__ == '__main__':
             pred[binn][region].Write()
          
             # png
-            file_name = '{}_{}.png'.format(binn, region)
-            #canvas.SaveAs(file_name)
+            file_name = '{}_{}_{}_prediction.png'.format(binn, region, year)
+            canvas.SaveAs('outputs/' + file_name)
 
 

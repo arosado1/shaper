@@ -25,13 +25,13 @@ def ShapeSyst(location):
     # histos[binn][variable][region]
     temp = LoadBinHisto(location)
 
-    # calculating systematics
+    # calculating shape systematics
     for binn in binns:
         for region in regions:
  
             #for total syst
             nbins = temp[binn][''][region].GetNbinsX()
-            shapeSyst[binn]['total'][region] = temp['Validation'][''][region].Clone()
+            shapeSyst[binn]['total'][region] = temp[binn][''][region].Clone()
             for k in range(0, nbins):
                 shapeSyst[binn]['total'][region].SetBinContent(k, 0)
 
@@ -42,11 +42,14 @@ def ShapeSyst(location):
                 shapeSyst[binn][variable][region] = temp[binn][variable][region].Clone()
                 shapeSyst[binn][variable][region].Add(temp[binn]['nj'][region], -1)
                 shapeSyst[binn][variable][region].Divide(temp[binn]['nj'][region])
+                print('variable = {}'.format(variable))
 
                 # total here is the envelople
                 for k in range(0, nbins):
                     a = abs( shapeSyst[binn][variable][region].GetBinContent(k) )
                     b = abs( shapeSyst[binn]['total'][region].GetBinContent(k) )
+                    print('bin = {}  a = {}  b = {}'.format(k, a, b))
+
                     if a > b:
                         shapeSyst[binn]['total'][region].SetBinContent(k, a)
 

@@ -11,10 +11,6 @@ from LoadHistograms import *
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 
-
-location  =  sys.argv[1]
-year      =  sys.argv[2]
-
 ################################################################################################################################
 
 def ShapeNormFactors(location):
@@ -95,7 +91,7 @@ def ShapeNormFactors(location):
             #----------------------------------------------------
 
             # combined shape factors
-            name  =  '{}_shape_Combined_{}_{}'.format(variable, region, year)
+            name  =  '{}_shape_Combined_{}'.format(variable, region)
             factors[variable][region]['Combined']['shape']  =  ROOT.TH1F( name, name, nbins, start, end)
                 
             for k in range(start, end):
@@ -139,6 +135,10 @@ if __name__ == '__main__':
     particles  =  ['Electron', 'Muon', 'Combined']
     regions    =  ['High', 'Low']
     
+
+    location  =  sys.argv[1]
+    year      =  sys.argv[2]
+
     factors  =  ShapeNormFactors(location)
     
     f = ROOT.TFile('factors_' + year + '.root', 'recreate')

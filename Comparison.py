@@ -64,8 +64,8 @@ def Compare(location_a, location_c):
                 
                 d /=  m.sqrt( ae**2 + ce**2 + asy**2  + csy**2 )
 
-                #print('bin = {}\nay = {}    cy = {}\nae = {}    ce = {}\nasy = {}    csy = {}\nd = {}\n').format(k, a, c, ae, ce, asy, csy, d)
-                print('d = {}'.format(d) )
+                print('bin = {}\nay = {}    cy = {}\nae = {}    ce = {}\nasy = {}    csy = {}\nd = {}\n').format(k, a, c, ae, ce, asy, csy, d)
+                #print('d = {}'.format(d) )
 
                 zscore[binn][region].SetBinContent(k, d)
 

@@ -99,3 +99,26 @@ if __name__ == '__main__':
             file_name = '{}_{}_total_yield.png'.format(binn, region)
             canvas.SaveAs('outputs/' + file_name)
 
+            canvas = ROOT.TCanvas('c', 'c', 800, 800)
+
+            totalsyst[binn]['up'][region].Draw("hist error")
+            totalsyst[binn]['up'][region].SetLineWidth(1)
+            totalsyst[binn]['up'][region].SetLineColor(ROOT.kRed)
+
+            totalsyst[binn]['down'][region].Draw("hist error same")
+            totalsyst[binn]['down'][region].SetLineWidth(1)
+            totalsyst[binn]['down'][region].SetLineColor(ROOT.kBlue) 
+
+            # legend
+            legend = ROOT.TLegend(0.5, 0.7, 0.9, 0.9)
+            legend.AddEntry( totalsyst[binn]['up'][region],   'up',   'l' )
+            legend.AddEntry( totalsyst[binn]['down'][region], 'down', 'l' )
+            legend.Draw()
+     
+            canvas.Update()
+     
+            # png
+            file_name = '{}_{}_total_syst.png'.format(binn, region)
+            canvas.SaveAs('outputs/' + file_name)
+
+

@@ -91,8 +91,10 @@ def ShapeNormFactors(location):
             #----------------------------------------------------
 
             # combined shape factors
-            name  =  '{}_shape_Combined_{}'.format(variable, region)
-            factors[variable][region]['Combined']['shape']  =  ROOT.TH1F( name, name, nbins, start, end)
+            name  =  '{}_shape_Combined_{}DM'.format(variable, region)
+            #factors[variable][region]['Combined']['shape']  =  ROOT.TH1F( name, name, nbins, 0, 1000)
+            factors[variable][region]['Combined']['shape']  =  factors[variable][region]['Electron']['shape'].Clone()
+            factors[variable][region]['Combined']['shape'].SetName(name)
                 
             for k in range(start, end):
             
@@ -141,7 +143,7 @@ if __name__ == '__main__':
 
     factors  =  ShapeNormFactors(location)
     
-    f = ROOT.TFile('factors_' + year + '.root', 'recreate')
+    f = ROOT.TFile('outputs/factors_' + year + '.root', 'recreate')
     
     for variable in variables: 
         for particle in particles:

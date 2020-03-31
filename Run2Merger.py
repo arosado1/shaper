@@ -86,12 +86,14 @@ if __name__ == '__main__':
             # canvas
             canvas = ROOT.TCanvas('c', 'c', 800, 800)
          
+            ROOT.gPad.SetLogy(1)
+
             # legend
             #legend = ROOT.TLegend(0.5, 0.7, 0.9, 0.9)
             #legend.AddEntry( pred[binn][region], 'what?', 'l' )
             #legend.Draw()
          
-            totalyield[binn][region].Draw('error')
+            totalyield[binn][region].Draw('hist')
          
             canvas.Update()
          
@@ -101,11 +103,11 @@ if __name__ == '__main__':
 
             canvas = ROOT.TCanvas('c', 'c', 800, 800)
 
-            totalsyst[binn]['up'][region].Draw("hist error")
+            totalsyst[binn]['up'][region].Draw("hist")
             totalsyst[binn]['up'][region].SetLineWidth(1)
             totalsyst[binn]['up'][region].SetLineColor(ROOT.kRed)
 
-            totalsyst[binn]['down'][region].Draw("hist error same")
+            totalsyst[binn]['down'][region].Draw("hist same")
             totalsyst[binn]['down'][region].SetLineWidth(1)
             totalsyst[binn]['down'][region].SetLineColor(ROOT.kBlue) 
 

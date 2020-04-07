@@ -7,6 +7,8 @@ from LowDMHighMET_merger import *
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 # make plots faster without displaying them
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
+# no info box
+ROOT.gStyle.SetOptStat(0)
 
 #ROOT.PyConfig.fAddDirectory(kFalse)
 
@@ -18,8 +20,8 @@ def LoadBinHisto(location):
     root_file = ROOT.TFile.Open(location)
 
     regions    =  ['High', 'Low']
-    variables  =  ['', 'nj','ht','met']
-    binns      =  ['Validation'] # need to add "Search"
+    variables  =  ['', 'nj','ht','met', 'ptb', 'nw', 'nrt', 'nmt', 'nb', 'mtb'] #, 'isr']
+    binns      =  ['Validation', 'Search'] # need to add "Search"
 
     # histos[binn][variable][region]
     histos = {b: { v: dict.fromkeys(regions) for v in variables } for b in binns}
@@ -77,8 +79,20 @@ def ForShapeNorm(location):
 
     root_file = ROOT.TFile.Open(location)
 
-    branches   =  ['nJets_drLeptonCleaned_jetpt30', 'HT_drLeptonCleaned_jetpt30', 'metWithLL']
-    variables  =  ['nj','ht','met']
+    suffix     =  '_drLeptonCleaned_jetpt30'
+
+    branches   =  [ 'nJets' + suffix, 
+                    'HT' + suffix, 
+                    'metWithLL',
+                    'ptb' + suffix,
+                    'nWs' + suffix,
+                    'nResolvedTops' + suffix,
+                    'nMergedTops' + suffix,
+                    'nBottoms' + suffix,
+                    'mtb' + suffix,
+                    #'ISRJetPt' + suffix  # or is it 'ISRJetPt_jetpt30' ??
+                  ]
+    variables  =  ['nj', 'ht', 'met', 'ptb', 'nw', 'nrt', 'nmt', 'nb', 'mtb', 'isr']
     regions    =  ['High', 'Low']
     particles  =  ['Electron','Muon']
     metcuts    =  ['', 'Loose']
@@ -95,7 +109,7 @@ def ForShapeNorm(location):
                 for metcut in metcuts:
                     for mcd, mcdn in zip(mcdata, mcdnew):
 
-                        # print("We are now in: {} {} {} {} {}").format(variable, region, particle, metcut, mcdn )
+                        #print("We are now in: {} {} {} {} {}").format(variable, region, particle, metcut, mcdn )
 
                         histogram  = ( "DataMC_{p}_{r}DM_{met}{v}_jetpt30{b}{b}{md}"
                                      ).format( p    =  particle,

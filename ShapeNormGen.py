@@ -26,7 +26,7 @@ def ShapeNormFactors(location):
     mcdata     =  ['Data', 'DY', 'Sint', 'TTbar', 'Rare']
     
     # for factors
-    variables  =  ['nj', 'ht', 'met'] # add more latter
+    variables  =  ['nj','ht','met', 'ptb', 'nw', 'nrt', 'nmt', 'nb', 'mtb'] #, 'isr']
     fattori    =  ['shape', 'norm']
     particles  =  ['Electron', 'Muon', 'Combined']
     regions    =  ['High', 'Low']
@@ -51,7 +51,7 @@ def ShapeNormFactors(location):
                 if (particle == 'Combined'):
                     continue 
     
-                # print("we are in: {} {} {}".format(variable, region, particle))
+                #print("we are in: {} {} {}".format(variable, region, particle))
     
                 #----------------------------------------------------
                 # shape factors
@@ -104,8 +104,12 @@ def ShapeNormFactors(location):
                 du  =  factors[variable][region]['Muon']['shape'].GetBinError(k)
             
                 if de == 0:
-                    factors[variable][region]['Combined']['shape'].SetBinContent(k, 0)
-                    factors[variable][region]['Combined']['shape'].SetBinError(k, 0)
+                    factors[variable][region]['Combined']['shape'].SetBinContent(k, u)
+                    factors[variable][region]['Combined']['shape'].SetBinError(k, du)
+                    continue
+                elif du == 0:
+                    factors[variable][region]['Combined']['shape'].SetBinContent(k, e)
+                    factors[variable][region]['Combined']['shape'].SetBinError(k, de)
                     continue
                 else:
                     we = (1/de)**2
@@ -133,10 +137,9 @@ if __name__ == '__main__':
     #----------------------------------------------------
     # create root and png
     #----------------------------------------------------
-    variables  =  ['nj', 'ht', 'met'] 
+    variables  =  ['nj','ht','met', 'ptb', 'nw', 'nrt', 'nmt', 'nb', 'mtb'] #, 'isr']
     particles  =  ['Electron', 'Muon', 'Combined']
     regions    =  ['High', 'Low']
-    
 
     location  =  sys.argv[1]
     year      =  sys.argv[2]

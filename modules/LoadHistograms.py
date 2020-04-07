@@ -144,7 +144,7 @@ def MCSyst(location):
     regions      =  ['High', 'Low']
     systematics  =  ['', 'pdf', 'metres', 'jes', 'btag', 'eff_restoptag', 'eff_sb', 'eff_toptag', 'eff_wtag', 'met_trig', 'pileup']
     directions   =  ['down', 'up']
-    binns        =  ['Validation'] # need to add "Search"
+    binns        =  ['Validation', 'Search'] 
 
     # histos[binn][syst][direction][region]
     histos = {b: {s: {d: dict.fromkeys(regions) for d in directions } for s in systematics } for b in binns}
@@ -168,30 +168,31 @@ def MCSyst(location):
                     histos[binn][syst][direction][region].SetDirectory(0)                
     
         #fixing LowDm and LowDMHighMET separation
-        for syst in systematics:
+        if binn == "Validation":
+            for syst in systematics:
     
-            branch    =    "nValidationBinLowDMHighMET_jetpt30"
-            histogram = (  "ZNuNu_nValidationBin_LowDM_HighMET_{}"
-    			   "jetpt30nValidationBinLowDMHighMET_"
-                           "jetpt30nValidationBinLowDMHighMET_"
-                           "jetpt30ZJetsToNuNu Validation Bin Low DM High METdata"
-                        ).format('' if not syst 
-                                    else   (syst + '_syst_' + direction + '_') 
-                                ) 
+                branch    =    "nValidationBinLowDMHighMET_jetpt30"
+                histogram = (  "ZNuNu_nValidationBin_LowDM_HighMET_{}"
+    	    		   "jetpt30nValidationBinLowDMHighMET_"
+                               "jetpt30nValidationBinLowDMHighMET_"
+                               "jetpt30ZJetsToNuNu Validation Bin Low DM High METdata"
+                            ).format('' if not syst 
+                                        else   (syst + '_syst_' + direction + '_') 
+                                    ) 
     
-            lowHighMet = root_file.Get(branch + "/" + histogram)
+                lowHighMet = root_file.Get(branch + "/" + histogram)
     
-            if not lowHighMet:
-                print("Error, histogram doesn't exist:\n    branch: {} \n    histogram: {}").format(branch, histogram)
-            
-            temp = LowDMMergerValidationBins(histos['Validation'][syst][direction]['Low'], lowHighMet)
+                if not lowHighMet:
+                    print("Error, histogram doesn't exist:\n    branch: {} \n    histogram: {}").format(branch, histogram)
+                
+                temp = LowDMMergerValidationBins(histos['Validation'][syst][direction]['Low'], lowHighMet)
     
-            histos['Validation'][syst][direction]['Low'] = temp.Clone()
-            histos['Validation'][syst][direction]['Low'].SetDirectory(0)
+                histos['Validation'][syst][direction]['Low'] = temp.Clone()
+                histos['Validation'][syst][direction]['Low'].SetDirectory(0)
     
-        root_file.Close()
+    root_file.Close()
     
-        print("Loading histograms has been successful")
+    print("Loading histograms has been successful")
 
     # histos[binn][syst][direction][region]
     return histos

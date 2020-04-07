@@ -1,4 +1,4 @@
-# TotalSyst.py (under construction)
+# MCSyst.py (under construction)
 # Calculate the total systematics uncertainty
 
 import ROOT
@@ -19,7 +19,7 @@ def TotalSyst(location):
     regions      =  ['High', 'Low']
     systematics  =  ['pdf', 'metres', 'jes', 'btag', 'eff_restoptag', 'eff_sb', 'eff_toptag', 'eff_wtag', 'met_trig', 'pileup']
     directions   =  ['down', 'up']
-    binns        =  ['Validation']
+    binns        =  ['Validation', 'Search']
 
     # shape[binn][direction][region]
     totalSyst = { b: { d: dict.fromkeys(regions) for d in directions } for b in binns }
@@ -31,10 +31,12 @@ def TotalSyst(location):
         for region in regions:
             for direction in directions:
 
+                print("We are now in: {} {} {}".format(binn, region, direction))
+
                 nbins = histos[binn][''][direction][region].GetNbinsX() 
                 totalSyst[binn][direction][region]  =  histos[binn][''][direction][region].Clone()
 
-                for k in range(0, nbins):
+                for k in range(0, nbins + 1):
                     
                     s  =  0 # we can include shape systematic here
                     n  =  histos[binn][ '' ][direction][region].GetBinContent(k)
@@ -67,7 +69,7 @@ if __name__ == '__main__':
 
     regions      =  ['High', 'Low']
     directions   =  ['down', 'up']
-    binns        =  ['Validation']
+    binns        =  ['Validation', 'Search']
 
     # histos[binn][direction][region]
     histos = TotalSyst(location)
@@ -88,6 +90,8 @@ if __name__ == '__main__':
 
             histos[binn]['up'][region].SetLineColor(ROOT.kRed)
             histos[binn]['down'][region].SetLineColor(ROOT.kBlue)
+            histos[binn]['up'][region].SetLineWidth(2)
+            histos[binn]['down'][region].SetLineWidth(2)
 
             legend.AddEntry(histos[binn]['up'][region], 'up', "l")
             legend.AddEntry(histos[binn]['down'][region], 'down', "l")

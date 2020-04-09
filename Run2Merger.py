@@ -6,7 +6,7 @@ import sys
 sys.dont_write_bytecode = True
 #from ShapeSyst import *
 from Prediction import *
-from TotalSyst import *
+from MCSyst import *
 
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 ROOT.gROOT.SetBatch(ROOT.kTRUE)

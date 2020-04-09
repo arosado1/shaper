@@ -38,7 +38,7 @@ def ShapeSyst(location):
                 shapeSyst[binn][variable][region] = temp[binn][variable][region].Clone()
                 shapeSyst[binn][variable][region].Add(temp[binn]['nj'][region], -1)
                 shapeSyst[binn][variable][region].Divide(temp[binn]['nj'][region])
-                print('binn = {}, region = {}, variable = {}'.format(binn, region, variable))
+                #print('binn = {}, region = {}, variable = {}'.format(binn, region, variable))
 
             # total here is the envelople
             shapeSyst[binn]['total'][region]          =  dict.fromkeys(directions) 
@@ -83,18 +83,25 @@ if __name__ == '__main__':
             stack = ROOT.THStack("stack", "stack2")    
 
             for variable, color in zip(variables, colors):
-                histos[binn][variable][region].GetYaxis().SetRangeUser(-0.7, 0.4)
+                histos[binn][variable][region].GetYaxis().SetRangeUser(-1.2, 1.2)
                 histos[binn][variable][region].Draw("same histo ")
                 histos[binn][variable][region].SetLineWidth(2)
                 #histos[binn][variable][region].SetFillColor(color)
                 histos[binn][variable][region].SetLineColor(color)
                 legend.AddEntry(histos[binn][variable][region], variable, "l")
 
-            #for direction in directions:
-            #    histos[binn]['total'][region][direction].Draw("same histo")
-            #    histos[binn]['total'][region][direction].SetLineWidth(2)
-            #    histos[binn]['total'][region][direction].SetLineColorAlpha(ROOT.kBlack, 0.7)
-            #    legend.AddEntry(histos[binn]['total'][region][direction], 'total_' + direction, "l")
+            flat  =  histos[binn]['total'][region]['up'].Clone()
+            flat.Scale(0)
+            flat.SetLineWidth(1)
+            flat.SetLineColor(ROOT.kBlack)
+            flat.Draw("hist same")
+
+            for direction in directions:
+                histos[binn]['total'][region][direction].Draw("same histo")
+                histos[binn]['total'][region][direction].SetLineWidth(2)
+                histos[binn]['total'][region][direction].SetLineColorAlpha(ROOT.kBlack, 1)
+                histos[binn]['total'][region][direction].SetLineStyle(2)
+                legend.AddEntry(histos[binn]['total'][region][direction], 'total_' + direction, "l")
 
             legend.Draw()
             c.Update()

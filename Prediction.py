@@ -67,12 +67,9 @@ def Prediction(location):
 
             shapesyst[binn][region]['up']  =  pred[binn][region].Clone()
             shapesyst[binn][region]['up'].Multiply(temp_2[binn]['total'][region]['up'])
-            shapesyst[binn][region]['up'].Add(pred[binn][region], -1)
 
             shapesyst[binn][region]['down']  =  pred[binn][region].Clone()
             shapesyst[binn][region]['down'].Multiply(temp_2[binn]['total'][region]['down'])
-            shapesyst[binn][region]['down'].Scale(-1)
-            shapesyst[binn][region]['down'].Add(pred[binn][region], 1)
 
     return pred, stat, shapesyst, mcsyst
 
@@ -140,17 +137,32 @@ if __name__ == '__main__':
 
             nbins  =  pred[binn][region].GetNbinsX()
 
-            for k in range(1, nbins):
+            for k in range(1, nbins + 1):
+
+                #print("bin {}".format(k))
 
                 a  =   0
                 a  =   pred[binn][region].GetBinError(k)
-                a  +=  mcsyst[binn][region]['up'].GetBinContent(k)
-                
+
+                m_u  =  abs(mcsyst[binn][region]['up'].GetBinContent(k))
+                m_d  =  abs(mcsyst[binn][region]['down'].GetBinContent(k))
+                if m_u > m_d :
+                    a  +=  m_u
+                else:
+                    a  +=  m_d
                 otherunc.SetBinError(k, a)
 
-                a  +=  shapesyst[binn][region]['up'].GetBinContent(k)
-
+                #print("firts a = {}".format(a))
+                    
+                s_u  =  abs(shapesyst[binn][region]['up'].GetBinContent(k))
+                s_d  =  abs(shapesyst[binn][region]['down'].GetBinContent(k))
+                if s_u > s_d :
+                    a  +=  s_u
+                else:
+                    a  +=  s_d
                 shapeunc.SetBinError(k, a)
+
+                #print("second a = {}".format(a))
 
             pred[binn][region].SetTitle("Prediction")
             pred[binn][region].SetLineColor(ROOT.kBlack)
@@ -159,6 +171,7 @@ if __name__ == '__main__':
             statunc.SetFillColor(ROOT.kRed)
             otherunc.SetFillColor(ROOT.kBlue)
             shapeunc.SetFillColor(ROOT.kGreen)
+            shapeunc.SetTitle('Prediction')
 
             shapeunc.Draw('e2')
             otherunc.Draw('e2 same')

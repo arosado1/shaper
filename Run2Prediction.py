@@ -39,7 +39,7 @@ def Run2Prediction(location_1, location_2, location_3):
             nbins  =  pred[binn][region].GetNbinsX()
 
             for direction in directions:
-                for k in range(1, nbins + 1):
+                for k in range(1, nbins):
  
                     a   =  ( stat[binn][region][direction].GetBinContent(k) )**2
                     a  +=  ( stat_2[binn][region][direction].GetBinContent(k) )**2
@@ -92,41 +92,41 @@ if __name__ == '__main__':
 
             nbins  =  pred[binn][region].GetNbinsX()
 
-            for k in range(1, nbins + 1):
+            for k in range(1, nbins):
 
                 #print("bin {}".format(k))
 
                 a  =   0
                 a  =   pred[binn][region].GetBinError(k)
 
-                m_u  =  abs(mcsyst[binn][region]['up'].GetBinContent(k))
-                m_d  =  abs(mcsyst[binn][region]['down'].GetBinContent(k))
+                m_u  =  ( mcsyst[binn][region]['up'].GetBinContent(k) )**2
+                m_d  =  ( mcsyst[binn][region]['down'].GetBinContent(k) )**2
                 if m_u > m_d :
                     a  +=  m_u
                 else:
                     a  +=  m_d
-                otherunc.SetBinError(k, a)
+                otherunc.SetBinError(k, m.sqrt(a))
 
                 #print("firts a = {}".format(a))
                     
-                s_u  =  abs(shapesyst[binn][region]['up'].GetBinContent(k))
-                s_d  =  abs(shapesyst[binn][region]['down'].GetBinContent(k))
+                s_u  =  ( shapesyst[binn][region]['up'].GetBinContent(k) )**2
+                s_d  =  ( shapesyst[binn][region]['down'].GetBinContent(k) )**2
                 if s_u > s_d :
                     a  +=  s_u
                 else:
                     a  +=  s_d
-                shapeunc.SetBinError(k, a)
+                shapeunc.SetBinError(k, m.sqrt(a))
 
                 #print("second a = {}".format(a))
 
-            pred[binn][region].SetTitle("Run 2 Prediction")
+            pred[binn][region].SetTitle( "Run 2 Prediction {} {}".format(binn, region) )
             pred[binn][region].SetLineColor(ROOT.kBlack)
             pred[binn][region].SetLineWidth(2)
 
             statunc.SetFillColor(ROOT.kRed)
             otherunc.SetFillColor(ROOT.kBlue)
             shapeunc.SetFillColor(ROOT.kGreen)
-            shapeunc.SetTitle('Run 2 Prediction')
+            shapeunc.SetTitle('Run 2 Prediction {} Bins {}#DeltaM'.format(binn, region))
 
             shapeunc.Draw('e2')
             otherunc.Draw('e2 same')
@@ -146,9 +146,9 @@ if __name__ == '__main__':
             # legend
             legend = ROOT.TLegend(0.5, 0.7, 0.9, 0.9)
             legend.AddEntry(pred[binn][region], 'yield', 'l' )
-            legend.AddEntry(statunc, 'statistics unc', 'l' )
-            legend.AddEntry(otherunc, 'others', 'l' )
-            legend.AddEntry(shapeunc, 'shape unc', 'l' )
+            legend.AddEntry(statunc, 'statistics unc', 'f' )
+            legend.AddEntry(otherunc, 'others', 'f' )
+            legend.AddEntry(shapeunc, 'shape unc', 'f' )
             legend.Draw()
          
             canvas.Update()

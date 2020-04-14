@@ -191,9 +191,9 @@ if __name__ == '__main__':
             # legend
             legend = ROOT.TLegend(0.5, 0.7, 0.9, 0.9)
             legend.AddEntry(pred[binn][region], 'yield', 'l' )
-            legend.AddEntry(statunc, 'statistics unc', 'l' )
-            legend.AddEntry(otherunc, 'others', 'l' )
-            legend.AddEntry(shapeunc, 'shape unc', 'l' )
+            legend.AddEntry(statunc, 'statistics unc', 'f' )
+            legend.AddEntry(otherunc, 'others', 'f' )
+            legend.AddEntry(shapeunc, 'shape unc', 'f' )
             legend.Draw()
          
             canvas.Update()

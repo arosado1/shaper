@@ -117,7 +117,7 @@ def ForShapeNorm(location):
                                                v    =  variable, 
                                                b    =  branch, 
                                                md   =  mcd,
-                                               met  =  "".format( '' if not metcut else (metcut + '_') )
+                                               met  =  "{}".format( '' if not metcut else (metcut + '_') )
                                      )
 
                         histos[variable][region][particle][metcut][mcdn] = root_file.Get(branch + "/" + histogram)

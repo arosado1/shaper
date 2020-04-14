@@ -36,9 +36,8 @@ def TotalSyst(location):
                 nbins = histos[binn][''][direction][region].GetNbinsX() 
                 totalSyst[binn][direction][region]  =  histos[binn][''][direction][region].Clone()
 
-                for k in range(0, nbins + 1):
-                    
-                    s  =  0 # we can include shape systematic here
+                for k in range(1, nbins):
+                    s  =  0 
                     n  =  histos[binn][ '' ][direction][region].GetBinContent(k)
                     if n != 0:
                         for syst in systematics:

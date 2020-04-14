@@ -80,8 +80,8 @@ def CalebSyst(validation_l, search_l):
 def CalebHists(location):
     """ An economic version to deal with"""
 
-    val_yield  =  location + "/validationBinsZinv_2016.root"
-    sea_yield  =  location + "/searchBinsZinv_2016.root"
+    val_yield  =  location + "/validationBinsZinv_Run2.root"
+    sea_yield  =  location + "/searchBinsZinv_Run2.root"
 
     val_syst  =  location + "/validationBinsZinv_syst_Run2.root"
     sea_syst  =  location + "/searchBinsZinv_syst_Run2.root"

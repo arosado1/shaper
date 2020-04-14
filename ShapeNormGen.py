@@ -69,8 +69,8 @@ def ShapeNormFactors(location):
                 #----------------------------------------------------
         
                 nbins  =  histos[variable][region][particle]['']['Data'].GetNbinsX()
-                start  =  0 
-                end    =  nbins + 1
+                start  =  1 
+                end    =  nbins
                 
                 # numerator
                 h_norm  =   histos[variable][region][particle]['']['Data'].Clone()
@@ -78,13 +78,16 @@ def ShapeNormFactors(location):
                 h_norm.Add( histos[variable][region][particle]['']['Rare'] , -1)
                 h_norm.Add( histos[variable][region][particle]['']['Sint'] , -1)
                 numerator = h_norm.Integral(start, end)
-        
+                # print("numerator = {}".format(numerator))        
+
                 # denominator
                 h_norm = histos[variable][region][particle]['']['DY'].Clone()
                 h_norm.Multiply(factors[variable][region][particle]['shape'])
                 denominator = h_norm.Integral(start, end)
+                # print("denominator = {}".format(denominator))        
         
                 factors[variable][region][particle]['norm'] = numerator/denominator
+                # print("Normalization factor for {} {} {} is: {}".format(variable, region, particle, numerator/denominator) )
         
             #----------------------------------------------------
             # merging electron and muons (weighted average) 

@@ -6,6 +6,7 @@ import math as m
 import sys
 sys.dont_write_bytecode = True
 sys.path.append('./modules')
+from WeightedAverager import *
 from LoadHistograms import *
 
 ROOT.PyConfig.IgnoreCommandLineOptions = True
@@ -27,7 +28,7 @@ def ShapeNormFactors(location):
     
     # for factors
     variables  =  ['nj','ht','met', 'ptb', 'nw', 'nrt', 'nmt', 'nb', 'mtb'] #, 'isr']
-    fattori    =  ['shape', 'norm']
+    fattori    =  ['shape', 'norm', 'normunc']
     particles  =  ['Electron', 'Muon', 'Combined']
     regions    =  ['High', 'Low']
 
@@ -44,6 +45,9 @@ def ShapeNormFactors(location):
     #----------------------
     # calculate factors
     #----------------------
+
+    num_error = ROOT.Double(0)
+    den_error = ROOT.Double(0)
 
     for variable in variables:
         for region in regions:
@@ -77,17 +81,24 @@ def ShapeNormFactors(location):
                 h_norm.Add( histos[variable][region][particle]['']['TTbar'], -1)
                 h_norm.Add( histos[variable][region][particle]['']['Rare'] , -1)
                 h_norm.Add( histos[variable][region][particle]['']['Sint'] , -1)
-                numerator = h_norm.Integral(start, end)
-                # print("numerator = {}".format(numerator))        
+                numerator = h_norm.IntegralAndError(start, end, num_error)
+                #print("numerator = {} and error = {}".format(numerator, num_error))        
 
                 # denominator
                 h_norm = histos[variable][region][particle]['']['DY'].Clone()
                 h_norm.Multiply(factors[variable][region][particle]['shape'])
-                denominator = h_norm.Integral(start, end)
-                # print("denominator = {}".format(denominator))        
+                denominator = h_norm.IntegralAndError(start, end, den_error)
+                #print("denominator = {} and error = {}".format(denominator, den_error))        
         
+                # norm
                 factors[variable][region][particle]['norm'] = numerator/denominator
-                # print("Normalization factor for {} {} {} is: {}".format(variable, region, particle, numerator/denominator) )
+
+                # uncertainty
+
+                abe = (num_error/numerator)**2 + (den_error/denominator)**2
+                factors[variable][region][particle]['normunc'] = factors[variable][region][particle]['norm'] * m.sqrt(abe)
+
+                #print("Normalization factor for {} {} {} is: {} +- {}".format(variable, region, particle, numerator/denominator, factors[variable][region][particle]['normunc']) )
         
             #----------------------------------------------------
             # merging electron and muons (weighted average) 
@@ -126,7 +137,16 @@ def ShapeNormFactors(location):
                 factors[variable][region]['Combined']['shape'].SetBinError(k, dc)
 
             # combined norm factors
-            factors[variable][region]['Combined']['norm'] = factors[variable][region]['Electron']['norm']
+
+            e   =  factors[variable][region]['Electron']['norm']    
+            de  =  factors[variable][region]['Electron']['normunc'] 
+            u   =  factors[variable][region]['Muon']['norm']        
+            du  =  factors[variable][region]['Muon']['normunc']     
+
+            c, dc  =  WeightedAverage(e, de, u, du)
+
+            factors[variable][region]['Combined']['norm']     =  c
+            factors[variable][region]['Combined']['normunc']  =  dc
 
     print("Calculation of shape and norm factors has been successful")
 
@@ -138,8 +158,10 @@ def ShapeNormFactors(location):
 if __name__ == '__main__':
 
     #----------------------------------------------------
-    # create root and png
+    # create root and png of shape factor
     #----------------------------------------------------
+    fattore = 'shape'
+
     variables  =  ['nj','ht','met', 'ptb', 'nw', 'nrt', 'nmt', 'nb', 'mtb'] #, 'isr']
     particles  =  ['Electron', 'Muon', 'Combined']
     regions    =  ['High', 'Low']
@@ -154,7 +176,6 @@ if __name__ == '__main__':
     for variable in variables: 
         for particle in particles:
             for region in regions:
-                fattore = 'shape'
     
                 #print("we are in: {} {} {} {}".format(variable, particle, region, fattore))
     
@@ -179,3 +200,21 @@ if __name__ == '__main__':
                 print(file_name)
     
     f.Close()
+
+    #----------------------------------------------------
+    # create text of normalization factor
+    #----------------------------------------------------
+    fattore = 'norm'
+
+    with open('outputs/norm.txt', 'w') as sheet:
+        sheet.write('###########################\n')
+        sheet.write('{}\n'.format(year))
+        sheet.write('###########################\n\n')
+        sheet.write('{:<24s} {:<9s} {:<8s}\n\n'.format('selection', 'norm', 'stat_unc') )
+        for variable in variables: 
+            for particle in particles:
+                for region in regions:
+
+                    sheet.write( '{:<4s} {:<9s} {:<5s} {:10.5f} {:10.5f}\n'.format(variable, particle, region, factors[variable][region][particle][fattore], factors[variable][region][particle]['normunc']) )
+
+

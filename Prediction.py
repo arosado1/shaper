@@ -128,7 +128,7 @@ if __name__ == '__main__':
             #print("We are now in: {} {}".format(binn, region))
 
             # canvas
-            canvas = ROOT.TCanvas('c', 'c', 800, 800)
+            canvas = ROOT.TCanvas('c', 'c', 1600, 800)
             ROOT.gPad.SetLogy()
          
             statunc   =  pred[binn][region].Clone()
@@ -189,7 +189,7 @@ if __name__ == '__main__':
             #mcsyst[binn][region]['down'].SetLineColor(ROOT.kGreen)
 
             # legend
-            legend = ROOT.TLegend(0.5, 0.7, 0.9, 0.9)
+            legend = ROOT.TLegend(0.6, 0.7, 0.9, 0.9)
             legend.AddEntry(pred[binn][region], 'yield', 'l' )
             legend.AddEntry(statunc, 'statistics unc', 'f' )
             legend.AddEntry(otherunc, 'others', 'f' )

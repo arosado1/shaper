@@ -23,9 +23,9 @@ def Compare(location_c):
     regions     =  ['Low', 'High']
     directions  =  ['up','down']
 
-    location_2016  =  "../condor/DataMC_2016_submission_2020-04-01_02-48-55/result.root"
-    location_2017  =  "../condor/DataMC_2017_submission_2020-04-01_02-51-55/result.root"
-    location_2018  =  "../condor/DataMC_2018_submission_2020-04-01_02-53-31/result.root"
+    location_2016  =  "../condor/2016_1apr2020/result.root"
+    location_2017  =  "../condor/2017_1apr2020/result.root"
+    location_2018  =  "../condor/2018_1apr2020/result.root"
   
     yield_a, stat, shapesyst, mcsyst  =  Run2Prediction(location_2016, location_2017, location_2018)
 
@@ -38,6 +38,8 @@ def Compare(location_c):
     for binn in binns:
         for region in regions:
 
+            print("binn = {}  |  region  {}".format(binn, region))
+ 
             nbins  =  yield_a[binn][region].GetNbinsX()
 
             zscore[binn][region]  =  yield_a[binn][region].Clone()
@@ -75,24 +77,31 @@ def Compare(location_c):
 
                 if ( d >= 0 ):
 
-                    asy  =  ( m_d )**2 + ( s_d )**2
+                    asy  =   m_d + s_d
                     csy  =  ( syst_c[binn][region]['up'].GetBinContent(k) - 1 )*c
 
                 elif ( d < 0 ):
 
-                    asy  =  ( m_u )**2 + ( s_u )**2
+                    asy  =  m_u + s_u
                     csy  =  ( syst_c[binn][region]['down'].GetBinContent(k) - 1 )*c
                 
                 d /=  m.sqrt( asy  + csy**2 + ce**2 )
 
-                yield_c[binn][region].SetBinError(k, m.sqrt( csy**2 + ce**2 ) )
+                ce = m.sqrt( csy**2 + ce**2 )
+                asy = m.sqrt(asy)
 
+                yield_c[binn][region].SetBinError(k, ce )
+                yield_a[binn][region].SetBinError(k, asy)
                 zscore[binn][region].SetBinContent(k, d)
+
+                print("bin {}: a={} ea={} asy={}  |  c={} ec={}  | d={}  z={}".format(k, a, ae, asy, c, ce, d, (a-c)/m.sqrt(asy**2 + ce**2) ))
+
+
 
     print('zscore calculation completed')
 
     # zscore[binn][region]
-    return zscore, yield_c
+    return zscore, yield_c, yield_a
 
 ################################################################################################################################
 
@@ -105,7 +114,7 @@ if __name__ == '__main__':
     location_c  =  sys.argv[1]
 
     #histos[binn][region]
-    zscore, caleb  =  Compare(location_c)
+    zscore, caleb, angel  =  Compare(location_c)
 
     for binn in binns:
         for region in regions:
@@ -118,10 +127,10 @@ if __name__ == '__main__':
             c.cd(1)
             ROOT.gPad.SetLogy(1)
 
-            location_2016  =  "../condor/DataMC_2016_submission_2020-04-01_02-48-55/result.root"
-            location_2017  =  "../condor/DataMC_2017_submission_2020-04-01_02-51-55/result.root"
-            location_2018  =  "../condor/DataMC_2018_submission_2020-04-01_02-53-31/result.root"
-            angel, stat, shapesyst, mcsyst  =  Run2Prediction(location_2016, location_2017, location_2018)
+            #location_2016  =  "../condor/2016_1apr2020/result.root"
+            #location_2017  =  "../condor/2017_1apr2020/result.root"
+            #location_2018  =  "../condor/2018_1apr2020/result.root"
+            #angel, stat, shapesyst, mcsyst  =  Run2Prediction(location_2016, location_2017, location_2018)
           
             # ZInv MC and Prediction
             # angel[binn][region].SetTitle( '{}#DeltaM Validation Bins Z#rightarrow#nu#nu comparison'.format(region) )

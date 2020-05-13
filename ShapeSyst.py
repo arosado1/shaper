@@ -78,7 +78,7 @@ if __name__ == '__main__':
     for binn in binns:
         for region in regions:
     
-            c = ROOT.TCanvas("c", "c", 800, 800)
+            c = ROOT.TCanvas("c", "c", 1800, 800)
             legend = ROOT.TLegend(0.75, 0.75, 0.9, 0.9)
             stack = ROOT.THStack("stack", "stack2")    
 
